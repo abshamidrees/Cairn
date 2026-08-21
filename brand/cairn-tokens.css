@@ -1,0 +1,177 @@
+/* ============================================================
+   Cairn design tokens, Tailwind v4 CSS-first
+   The only source of colour, type, spacing, radius, motion.
+   Do not introduce a value that is not in this file.
+   ============================================================ */
+
+@import "tailwindcss";
+
+@theme {
+  /* ---- Surface & ink -------------------------------------- */
+  --color-chalk:    #F2F3EF;   /* page background, ~80% of any screen */
+  --color-paper:    #FBFBF9;   /* cards, panels, inputs, raised surfaces */
+  --color-seam:     #DFE1DA;   /* every border and divider, one hairline weight */
+  --color-graphite: #16181A;   /* headings, the mark, numbers */
+  --color-slate:    #454B4F;   /* body copy */
+  --color-scree:    #8A9197;   /* captions, labels, placeholders, THIN standing */
+  --color-basalt:   #101214;   /* the one dark panel: footer, code blocks, explorer shell */
+
+  /* ---- Evidence colours -----------------------------------
+     Colour means evidence. If a colour appears where Cairn has
+     no observation to point at, it is wrong. There is no fourth. */
+  --color-lapis:    #223FA6;   /* GROUNDED · primary action · links */
+  --color-lapis-ink:#1A3183;   /* lapis hover / pressed */
+  --color-oxide:    #8C2130;   /* SUSPECT · contradicted by our own record */
+
+  /* ---- Type ------------------------------------------------ */
+  --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-sans:    var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* ---- Radius ---------------------------------------------- */
+  --radius-stone: 3px;   /* cards, inputs, chips, deliberately tight */
+  --radius-pill:  999px; /* buttons only */
+
+  /* ---- Motion ---------------------------------------------- */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quick:  cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:   140ms;
+  --dur-base:   260ms;
+  --dur-stack:  420ms;   /* one stone entering the stack */
+  --stagger:     90ms;   /* delay between stones */
+}
+
+/* ---- Type scale -------------------------------------------
+   Tracking tightens as size grows and loosens on small mono.
+   A single global letter-spacing value is wrong somewhere by
+   definition. Display is 400, never bold, the confidence comes
+   from size, not weight. */
+:root {
+  --text-hero:        clamp(2.75rem, 7.5vw, 6rem);
+  --text-hero-track:  -0.03em;
+  --text-hero-lead:   0.94;
+
+  --text-section:     clamp(2rem, 4.4vw, 3.5rem);
+  --text-section-track: -0.022em;
+  --text-section-lead:  1.02;
+
+  --text-card:        1.5rem;
+  --text-card-track:  -0.015em;
+
+  --text-lead:        1.0625rem;   /* 17px */
+  --text-lead-lead:   1.62;
+
+  --text-body:        0.9375rem;   /* 15px */
+  --text-body-lead:   1.65;
+
+  --text-data:        0.8125rem;   /* 13px mono */
+  --text-data-track:  -0.005em;
+
+  --text-label:       0.6875rem;   /* 11px mono uppercase */
+  --text-label-track: 0.13em;
+
+  /* Layout */
+  --measure:      42rem;   /* prose max-width */
+  --gutter:       clamp(1.25rem, 4vw, 3rem);
+  --page-max:     78rem;
+  --claim-col:    58%;     /* the claim / basis split, see brief §4 */
+  --basis-col:    42%;
+}
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: var(--color-chalk);
+    color: var(--color-slate);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body-lead);
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-graphite);
+  }
+
+  /* Every number, ID, hash, address, timestamp and amount. No exceptions,
+     including KPI figures and chart axes. */
+  .num, td.num, .amount, .addr, .hash, .ts {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label-track);
+    text-transform: uppercase;
+    color: var(--color-scree);
+  }
+
+  /* The verdict line. The only italic in the product. */
+  .verdict {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--color-graphite);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lapis);
+    outline-offset: 2px;
+    border-radius: var(--radius-stone);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+}
+
+@layer components {
+  /* ---- Standing chips ------------------------------------
+     Four standings, one visual grammar. THIN is deliberately
+     colourless: no evidence, no colour. */
+  .standing {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label-track);
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: var(--radius-stone);
+    border: 1px solid;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .standing--grounded { color: var(--color-lapis);  border-color: color-mix(in srgb, var(--color-lapis) 30%, transparent); background: color-mix(in srgb, var(--color-lapis) 6%, transparent); }
+  .standing--thin     { color: var(--color-scree);  border-color: var(--color-seam); background: transparent; }
+  .standing--suspect  { color: var(--color-oxide);  border-color: color-mix(in srgb, var(--color-oxide) 30%, transparent); background: color-mix(in srgb, var(--color-oxide) 6%, transparent); }
+  .standing--dormant  { color: var(--color-seam);   border-color: var(--color-seam); background: transparent; }
+
+  /* ---- Stones (the signature element) ---------------------
+     Width is weight. Fill is grounding. Never the reverse. */
+  .stone {
+    height: 14px;
+    border-radius: var(--radius-stone);
+    transition: transform var(--dur-base) var(--ease-settle),
+                opacity  var(--dur-base) var(--ease-settle);
+  }
+  .stone--grounded { background: var(--color-lapis); }
+  .stone--thin     { background: transparent; border: 1px solid var(--color-seam); }
+  .stone--suspect  { background: var(--color-oxide); }
+  .stone--dormant  { background: var(--color-seam); }
+
+  @keyframes stone-settle {
+    from { transform: translateY(14px) rotate(0deg); opacity: 0; }
+    to   { transform: translateY(0)    rotate(var(--tilt, 0deg)); opacity: 1; }
+  }
+  .stone--entering {
+    animation: stone-settle var(--dur-stack) var(--ease-settle) backwards;
+  }
+}

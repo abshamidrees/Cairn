@@ -1,0 +1,53 @@
+# ---- Secrets. Nothing here ever gets committed. --------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+keystore/
+
+# ---- Sibyl Memory --------------------------------------------------
+# The memory database is machine-local and can contain indexed counterparty
+# data. It is never committed. Judges reproduce it with observe.base --bootstrap.
+*.db
+*.db-wal
+*.db-shm
+.sibyl-memory/
+data/
+/tmp-memory/
+
+# ---- Python --------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- Node / Next ---------------------------------------------------
+node_modules/
+.next/
+out/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+.vercel/
+
+# ---- Editors / OS --------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# ---- Local scratch -------------------------------------------------
+scratch/
+*.local
+refs/**/screens/
+refs/**/screenshots/
