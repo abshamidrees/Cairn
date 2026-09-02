@@ -1,23 +1,50 @@
-# ---- Secrets. Nothing here ever gets committed. --------------------
+# ---- Secrets. Nothing in this block is ever committed. --------------
 .env
 .env.*
 !.env.example
 *.pem
 *.key
-credentials.json
+*.keystore
+*.p12
+*.mnemonic
+credentials*.json
+secrets*.json
 keystore/
+.acp/
+.config/acp/
+wallet-*.json
 
-# ---- Sibyl Memory --------------------------------------------------
-# The memory database is machine-local and can contain indexed counterparty
-# data. It is never committed. Judges reproduce it with observe.base --bootstrap.
+# ---- Private planning. On disk for tooling, never in git. -----------
+CLAUDE.md
+.claude/
+.agents/
+skills-lock.json
+docs/BRIEF.md
+docs/PLAYBOOK.md
+docs/SUBMISSION.md
+docs/RULES.md
+docs/_*.md
+# Duplicate copies of the brief that would otherwise slip past the rules above.
+CAIRN-BRIEF*.md
+docs/CAIRN-BRIEF*.md
+brand/LOGO-PROMPTS.md
+private/
+notes/
+scratch/
+refs/
+
+# ---- Sibyl Memory ---------------------------------------------------
+# Machine-local and contains indexed counterparty data. Judges rebuild it
+# with `observe.base --bootstrap`; it is never committed.
 *.db
 *.db-wal
 *.db-shm
+*.sqlite*
 .sibyl-memory/
 data/
-/tmp-memory/
+memory-snapshots/
 
-# ---- Python --------------------------------------------------------
+# ---- Python ---------------------------------------------------------
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -29,7 +56,7 @@ venv/
 .coverage
 htmlcov/
 
-# ---- Node / Next ---------------------------------------------------
+# ---- Node / Next ----------------------------------------------------
 node_modules/
 .next/
 out/
@@ -39,15 +66,18 @@ build/
 *.tsbuildinfo
 .vercel/
 
-# ---- Editors / OS --------------------------------------------------
+# ---- Fly / infra ----------------------------------------------------
+fly.toml.local
+.fly/
+
+# ---- Editors / OS ---------------------------------------------------
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
 
-# ---- Local scratch -------------------------------------------------
-scratch/
-*.local
-refs/**/screens/
-refs/**/screenshots/
+# ---- Media that bloats a clone --------------------------------------
+*.mov
+*.mp4
+!assets/demo-thumbnail.png
