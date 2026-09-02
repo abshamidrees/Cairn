@@ -59,3 +59,31 @@ def test_the_adapter_is_where_the_allowlist_says_it_is() -> None:
     """Guards against the allowlist silently passing because a file was moved."""
     for allowed in ALLOWED:
         assert (ROOT / allowed).exists(), f"{allowed} is on the allowlist but does not exist"
+
+
+# The verdict is arithmetic over the record. The rationale sentence rendered for
+# a human may come from a model; the decision may not, and a judge will ask
+# which is which. This makes the answer checkable rather than a claim.
+LLM_ROOTS = {"anthropic", "openai", "cohere", "litellm", "langchain"}
+
+JUDGE = ROOT / "apps" / "agent" / "judge"
+
+
+def _imported_roots(path: Path) -> set[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    roots: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            roots.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module is not None:
+            roots.add(node.module.split(".")[0])
+    return roots
+
+
+def test_no_model_client_reaches_the_decision_path() -> None:
+    offenders = {
+        path.relative_to(ROOT): sorted(_imported_roots(path) & LLM_ROOTS)
+        for path in JUDGE.rglob("*.py")
+        if _imported_roots(path) & LLM_ROOTS
+    }
+    assert offenders == {}, f"the verdict engine must not call a model: {offenders}"
