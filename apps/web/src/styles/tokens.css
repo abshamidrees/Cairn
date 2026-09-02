@@ -174,4 +174,15 @@
   .stone--entering {
     animation: stone-settle var(--dur-stack) var(--ease-settle) backwards;
   }
+
+  /* The deletion toggle, motion moment three. Stones fall away downward and
+     out, losing their lean on the way, so the stack visibly stops being a
+     stack rather than merely fading. */
+  @keyframes stone-fall {
+    from { transform: translateY(0)    rotate(var(--tilt, 0deg)); opacity: 1; }
+    to   { transform: translateY(28px) rotate(0deg);              opacity: 0; }
+  }
+  .stone--leaving {
+    animation: stone-fall var(--dur-stack) var(--ease-quick) forwards;
+  }
 }
