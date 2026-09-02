@@ -102,6 +102,63 @@ curl "localhost:8000/v1/lookup/0x...?memory=off"   # the same call, memory bypas
 
 ---
 
+## Memory runtime
+
+Cairn's every claim rests on Sibyl Memory behaving as an offline, credential-free
+store with isolated tenants. That is checked rather than assumed:
+
+```bash
+python scripts/verify_memory.py
+```
+
+The probe blocks outbound sockets before it starts, so "works offline" is proven,
+not asserted. It exercises all five tiers and tenant isolation against a fresh
+database:
+
+```
+  tenant id accepts our cp:<chain>:<address> scheme   ok
+  HOT   set_state / get_state                         ok
+  WARM  set_entity / get_entity                       ok
+  COLD  write_event / read_events                     ok
+  REFERENCE set_reference / get_reference             ok
+  ARCHIVE archive_entity moves the row out            ok
+  FTS5 search returns hits                            ok
+  tenant isolation holds                              ok
+
+  tier            free
+  schema version  4
+  free tier       {'tier': 'free', 'db_size_bytes': 282624,
+                   'soft_cap_bytes': 5242880, 'pct_used': 0.054}
+
+  MemoryClient.local() works offline with no credentials.  PASS
+```
+
+`sibyl health` agrees:
+
+```
+  schema_version   4
+  db_path          ~/.sibyl-memory/memory.db
+  db_size_bytes    282624
+  tier             free
+  hermes_bound     False
+```
+
+Two findings from phase 0 that shape the adapter:
+
+**The free tier caps the database at 5,242,880 bytes.** That is the CLI's own
+number, not the docs', and it is what the indexed set is scoped against.
+
+**`archive_entity` moves a row out rather than flagging it.** After archiving,
+`list_entities` returns nothing under any status, `get_entity` raises
+`NotFoundError`, and `archive` is not a valid search tier, so the `reason` cannot
+be read back through the client at all. Archival is therefore journalled as an
+event too, or a demotion would leave no auditable trace.
+
+`sibyl status` additionally reports the server-side account tier and requires
+`sibyl init`, a one-time browser activation. The local store above needs neither.
+
+---
+
 ## Vocabulary
 
 Used consistently in the UI, the API, the errors and the commit log.
@@ -129,11 +186,8 @@ apps/agent/       Python. Cairn core, and the load-bearing code.
 apps/web/         Next.js 15, landing, explorer, docs
 packages/chain/   web3.py, ERC-8004, USDC, x402
 scripts/          deletion_test.py and friends
-docs/BRIEF.md     Full build brief. Source of truth.
 docs/TECH-PRIMER.md   How Cairn works, in plain language
-docs/SUBMISSION.md    Submission field drafts and the pre-flight checklist
-docs/PLAYBOOK.md      Dated build plan
-brand/            Marks, tokens, logo exploration
+brand/            Marks and design tokens
 ```
 
 ---

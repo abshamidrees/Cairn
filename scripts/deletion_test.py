@@ -69,18 +69,8 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="machine-readable output")
     args = parser.parse_args()
 
-    # TODO(phase 3):
-    #   from apps.agent.memory.store import MemoryStore, NullStore
-    #   from apps.agent.judge.verdict import evaluate
-    #
-    #   on  = evaluate(args.agent, store=MemoryStore.open())
-    #   off = evaluate(args.agent, store=NullStore())
-    #
-    #   render(on, off)
-    #   return EXIT_PASS if off.is_unusable() else EXIT_FAIL
-
     print(
-        "deletion_test: not implemented yet.\n"
+        f"deletion_test: not implemented yet, asked about {args.agent}.\n"
         "Implement in phase 3 against apps/agent/judge/verdict.py.\n"
         "See the module docstring for the contract.",
         file=sys.stderr,

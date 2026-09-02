@@ -1,0 +1,61 @@
+[project]
+name = "cairn-agent"
+version = "0.1.0"
+description = "Cairn, a memory-native trust layer for agent commerce."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["apps/agent", "packages", "scripts"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W",    # pycodestyle
+  "F",         # pyflakes
+  "I",         # import sorting
+  "N",         # pep8-naming
+  "UP",        # pyupgrade
+  "B",         # bugbear
+  "A",         # builtin shadowing
+  "C4",        # comprehensions
+  "SIM",       # simplify
+  "TID",       # tidy imports
+  "PTH",       # use pathlib
+  "RUF",       # ruff-specific
+  "ANN",       # require annotations, part 18 asks for them on every signature
+  "S",         # bandit, no committed secrets or unsafe calls
+  "T20",       # no print() left in library code
+  "TRY",       # no swallowed errors
+  "E722",      # never a bare except
+]
+ignore = [
+  "TRY003",    # long messages inline are fine, they are read in tracebacks
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Scripts are CLIs. Printing is their output, not debugging.
+"scripts/*" = ["T20"]
+# Asserting is what a test does.
+"tests/*" = ["S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "packages", "scripts", "tests"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+disallow_any_explicit = false
+files = ["apps/agent", "packages", "scripts"]
+
+[[tool.mypy.overrides]]
+# The SDK ships no py.typed marker, so its surface is untyped to mypy.
+module = ["sibyl_memory_client.*"]
+ignore_missing_imports = true
