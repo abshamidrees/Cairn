@@ -1,3 +1,8 @@
 # Runtime. Pinned to the versions phase 0 verified against.
 sibyl-memory-client==0.8.0
 sibyl-memory-cli==0.4.0
+
+# Base chain reads. eth-abi is listed because observe/base.py decodes
+# the reputation event with it directly, not only through web3.
+web3==8.0.0
+eth-abi==6.0.0

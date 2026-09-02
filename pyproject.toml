@@ -40,8 +40,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Scripts are CLIs. Printing is their output, not debugging.
+# Scripts and the indexer entry point are CLIs. Printing is their output,
+# not debugging.
 "scripts/*" = ["T20"]
+"apps/agent/observe/base.py" = ["T20"]
 # Asserting is what a test does.
 "tests/*" = ["S101"]
 

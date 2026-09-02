@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from sibyl_memory_client import MemoryClient
-from sibyl_memory_client.exceptions import NotFoundError
+from sibyl_memory_client.exceptions import CapExceededError, NotFoundError
 
 # The published methodology is generated from these constants, so the
 # documentation cannot drift from the engine. See brief part 20.
@@ -60,6 +60,14 @@ BEHAVIOUR = "behaviour"
 FORWARD_CURSOR = "forward-cursor"
 
 SELF_TENANT = "cairn:self"
+
+
+class MemoryCapReachedError(RuntimeError):
+    """The free tier's database cap is full.
+
+    Translated here so callers can stop cleanly without importing the SDK, which
+    would breach the one-importer rule the deletion test depends on.
+    """
 
 
 # What a durable fact's value may be. Narrower than Any, and it is what the
@@ -224,11 +232,14 @@ class MemoryStore:
         and journals the promotion as its own event, so the tier migration is
         itself part of the record.
         """
-        event_id: Any = self._m.write_event(
-            evaluated={"observation": obs.as_payload()},
-            acted={"tier": "COLD", "wrote": "journal"},
-            forward=[],
-        )
+        try:
+            event_id: Any = self._m.write_event(
+                evaluated={"observation": obs.as_payload()},
+                acted={"tier": "COLD", "wrote": "journal"},
+                forward=[],
+            )
+        except CapExceededError as exc:
+            raise MemoryCapReachedError(str(exc)) from exc
         promotion = self._promote_if_due(obs)
         return Written(observation_id=str(event_id), promotion=promotion)
 

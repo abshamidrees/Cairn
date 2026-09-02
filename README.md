@@ -63,6 +63,68 @@ Three memory patterns do the work:
 
 ---
 
+## The indexed set
+
+The free tier caps `memory.db` at 5,242,880 bytes and the SDK enforces it, so the
+indexed set is scoped rather than truncated quietly. Brief part 10 asks for that
+decision to be stated, so here it is.
+
+| | |
+|---|---|
+| Chain | Base mainnet, 8453 |
+| Registries | Identity `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`, Reputation `0x8004BAa17C55a88189AE136b182e5fdA19dE9b63` |
+| Block range | 50,763,849 to 50,783,850 (20,002 blocks) |
+| Agents seen | 107 |
+| Counterparty dossiers | 70 |
+| Reviewer dossiers | 14 |
+| Observations | 364, being 139 feedback, 139 claims, 86 registrations |
+| Registration files | 55 resolved, 24 unavailable |
+| Promoted to WARM | 7 patterns at three or more occurrences |
+| Database | 3,522,560 bytes, 67.2% of the cap |
+
+Rebuild it with:
+
+```bash
+python -m apps.agent.observe.base --blocks 20000 --json
+```
+
+The window is the binding constraint, not a preference. At roughly 9.7KB per
+observation once the journal is indexed for search, the cap holds around 500
+observations, and the scan stops cleanly and reports `stopped_at_cap` rather than
+dying or silently dropping rows. The remaining third is left for the verdicts and
+promotions phase 3 writes. Widening the window means the paid tier, and that is a
+decision to take deliberately rather than by accident.
+
+The indexer is cursor-based and idempotent. Every observation is keyed by a
+SHA-256 of the raw log, so rerunning the same range writes nothing:
+
+```
+observations_written  0
+duplicates_skipped    364
+```
+
+### What the window shows
+
+One structural note, stated as a property of the registry rather than of anyone
+using it. Of the 139 feedback observations in this window, 100 were written by a
+single reviewer about a single agent, and 72% of the tagged feedback carries one
+tag. Cairn does not read that as misconduct and does not say so anywhere in the
+product. It reads it as the reason a reputation layer that counts feedback
+without weighting who produced it cannot mean very much, which is the argument
+the reviewer-weighting layer exists to answer.
+
+### On the reputation event's shape
+
+Neither registry implementation is verified on Sourcify, so the feedback event's
+ABI is not published anywhere the indexer can fetch. Its layout was derived from
+the wire and decoded 549 of 549 live logs cleanly, and the tests pin it against a
+log captured from mainnet. Three integers in the event have no published meaning,
+so they are carried under `unresolved` rather than being named. Naming one of
+them "score" and then judging a real agent on the guess is precisely the failure
+brief part 21 is written to prevent.
+
+---
+
 ## Partner stacks
 
 | Stack | What it does here | Where |
