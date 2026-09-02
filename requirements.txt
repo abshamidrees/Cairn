@@ -6,3 +6,9 @@ sibyl-memory-cli==0.4.0
 # the reputation event with it directly, not only through web3.
 web3==8.0.0
 eth-abi==6.0.0
+
+# The read API. uvicorn serves it; httpx is what starlette's TestClient
+# drives the endpoints with in tests/test_api.py.
+fastapi==0.141.1
+uvicorn==0.52.4
+httpx==0.28.1

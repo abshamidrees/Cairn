@@ -179,6 +179,8 @@ class Store(Protocol):
 
     def facts(self, category: str | None = None) -> list[dict[str, Any]]: ...
 
+    def archived(self) -> list[dict[str, Any]]: ...
+
     def archive_stale(self, *, now: datetime | None = None) -> list[Archived]: ...
 
     def put_reference(self, key: str, body: Mapping[str, Any]) -> None: ...
@@ -330,6 +332,23 @@ class MemoryStore:
     def facts(self, category: str | None = None) -> list[dict[str, Any]]:
         rows: Any = self._m.list_entities(category, limit=JOURNAL_SCAN_LIMIT)
         return [row for row in rows if isinstance(row, dict)]
+
+    def archived(self) -> list[dict[str, Any]]:
+        """Entities retired from this dossier, read back out of the journal.
+
+        `archive_entity` moves a row beyond the reach of every read the client
+        offers, so the journalled archival is the only surviving account of what
+        was retired and why. The ARCHIVE band of the Stack is drawn from here.
+        """
+        out: list[dict[str, Any]] = []
+        for event in self._m.read_events(limit=JOURNAL_SCAN_LIMIT):
+            evaluated = event.get("evaluated")
+            if not isinstance(evaluated, dict):
+                continue
+            record = evaluated.get("archival")
+            if isinstance(record, dict):
+                out.append({"id": str(event["id"]), "ts": str(event["ts"]), **record})
+        return out
 
     def assert_fact(
         self, category: str, name: str, value: JsonValue, *, observation_id: str
@@ -504,6 +523,9 @@ class NullStore:
 
     def facts(self, category: str | None = None) -> list[dict[str, Any]]:
         del category
+        return []
+
+    def archived(self) -> list[dict[str, Any]]:
         return []
 
     def archive_stale(self, *, now: datetime | None = None) -> list[Archived]:
