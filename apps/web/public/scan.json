@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-09-03T01:16:04Z",
+  "method": {
+    "chain_id": 8453,
+    "identity_registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+    "reputation_registry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+    "blocks": "50763849-50783850",
+    "reproduce": [
+      "python -m apps.agent.observe.base --bootstrap",
+      "python scripts/scan.py --db data/memory.db"
+    ],
+    "note": "Aggregate only. No agent or claimant is named, ranked or accused. This is a finding about the registry's design."
+  },
+  "indexed": {
+    "blocks_scanned": 20002,
+    "agents_seen": 107,
+    "counterparty_dossiers": 70,
+    "claimant_dossiers": 14,
+    "observations": 225
+  },
+  "finding": {
+    "subjects_with_feedback": 22,
+    "subjects_with_a_single_voice": 16,
+    "share_single_voice": 0.7273,
+    "voices_per_subject": {
+      "1": 16,
+      "2": 5,
+      "3": 1
+    },
+    "largest_single_claimant_volume": 100,
+    "reads": "16 of 22 subjects carrying feedback have exactly one party speaking about them. A layer that counts feedback cannot tell that apart from several parties agreeing."
+  },
+  "standings": {
+    "grounded": 1,
+    "thin": 69,
+    "suspect": 0,
+    "dormant": 0,
+    "grounded_requires": "3 or more observations corroborated by a different party",
+    "suspect_note": "Zero. No agent in the indexed set has two conflicting owner records, and Cairn does not publish a suspect standing it cannot point at."
+  }
+}

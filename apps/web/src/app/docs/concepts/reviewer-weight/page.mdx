@@ -1,0 +1,30 @@
+# Reviewer weight
+
+**A reviewer weight is how much a claimant's word moves a verdict.** ERC-8004 defers this layer to a
+reviewer reputation system that, in its own words, does not yet exist. This is that layer.
+
+```
+address                      0x6b51d0d67ff41dab76e499546abe6b8b03cf8732
+claims made                  100
+independently corroborated   0
+weight carried               0.50
+provisional                  yes
+```
+
+## How it is computed
+
+The claimant's own dossier holds every claim they have made, which is the denominator. A claim
+counts as corroborated when some other claimant left a record about the same agent. Nobody
+corroborates themselves.
+
+## Provisional is neutral, not negative
+
+Below three corroborated outcomes a claimant carries the neutral weight and the API returns it
+flagged. Having made few claims is not evidence of anything, good or bad, and Cairn does not treat
+it as either. In the indexed set, 13 of 14 claimants are provisional.
+
+## What this catches
+
+The example above is real. One address made 100 claims, all about the same agent, all tagged the
+same way, and not one was witnessed by anybody else. Under a scheme that counts feedback, that
+address moves a score a hundred times. Under Cairn it carries the same weight as a stranger.

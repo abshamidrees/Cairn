@@ -1,0 +1,73 @@
+# Lookup
+
+**Returns the verdict for one counterparty, with the observations it rests on.** Free, no auth, no
+wallet connection required to read.
+
+```
+GET /v1/lookup/{address}?chain=base&memory=on
+```
+
+| parameter | values | meaning |
+| --- | --- | --- |
+| chain | base | which chain the counterparty is on |
+| memory | on, off | off genuinely bypasses the memory layer, server side |
+
+Anything other than on or off is rejected with a 422 rather than falling through to the real store.
+
+## Request
+
+```
+curl -s localhost:8000/v1/lookup/0x01f90369170c917a2c0e9d26d54c6a3a400984d3
+```
+
+## Response
+
+Trimmed to one basis item and one claimant.
+
+```
+{
+  "counterparty": "cp:base:0x01f90369170c917a2c0e9d26d54c6a3a400984d3",
+  "memory": "on",
+  "standing": "grounded",
+  "confidence": 0.84,
+  "basis": [
+    {
+      "observation_id": "7a6c63f5-03af-429a-b34e-347d1fd54921",
+      "kind": "erc8004_feedback",
+      "occurred_at": "2026-09-02T13:51:03.485Z",
+      "content_hash": "sha256:9cc1136c08ae20550bf44898ae6f7f316a7ced0ad5b...",
+      "source": "base:0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "reviewer": "0xa3279f744438f83bc75ce9f8a8282c448f97cc8a",
+      "corroborated": true,
+      "weight": 0.4974,
+      "tx_hash": "0x48a0875f7f61b39015a5773bf620b0413234e0134cb335d5697..."
+    }
+  ],
+  "contradictions": [],
+  "reviewers": [
+    { "address": "0x3aebb73a...", "claims": 1, "corroborated": 1,
+      "weight": 0.5, "provisional": true }
+  ],
+  "sources_unavailable": [],
+  "prior": { "standing": "grounded", "confidence": 0.84 },
+  "no_basis": false,
+  "evaluated_at": "2026-09-03T00:57:32.842Z"
+}
+```
+
+## The same call with memory off
+
+```
+curl -s "localhost:8000/v1/lookup/0x01f9...84d3?memory=off"
+```
+
+Returns `standing: "thin"`, `confidence: null`, `basis: []`, `no_basis: true`. That empty state came
+from a server that genuinely had nothing to read.
+
+## Reading it correctly
+
+`no_basis: true` means Cairn has never watched this agent do anything. It does not mean the agent
+behaved badly. `confidence: null` and `confidence: 0.0` are different answers.
+
+This endpoint is read-only. It does not record the verdict it computes, because a read that writes
+is a read that can fail when a quota is full.

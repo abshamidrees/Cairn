@@ -1,0 +1,30 @@
+# Standing
+
+**A standing is a counterparty's position in Cairn's record.** There are four, and they are
+deliberately neutral: none says an agent is fraudulent, because Cairn cannot support that claim.
+
+| standing | means |
+| --- | --- |
+| grounded | 3 or more corroborated observations, and nothing contradicting itself |
+| thin | fewer than 3 corroborated observations |
+| suspect | the record contradicts itself, and the observations can be named |
+| dormant | nothing witnessed for 90 days |
+
+## Precedence
+
+Nothing witnessed at all is thin, not suspect and not dormant. A contradiction outranks staleness.
+Otherwise a dossier past the decay window is dormant, and a corroborated one is grounded.
+
+## suspect is the strict one
+
+The engine may only return suspect when it can name the observation ids that disagree. Reaching it
+with an empty basis raises rather than downgrading quietly to something gentler, because an auditor
+that accuses without being able to say why is worse than one that stays silent.
+
+A source that was never fetched contributes nothing. Absence is never evidence: a registration file
+Cairn could not retrieve marks that source unavailable, and cannot make anybody suspect.
+
+## In the indexed set
+
+Of 70 counterparties: 1 grounded, 69 thin, 0 suspect, 0 dormant. Zero suspect is the honest count.
+No agent in the set has two conflicting owner records, so there is nothing to point at.

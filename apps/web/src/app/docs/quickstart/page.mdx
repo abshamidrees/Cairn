@@ -1,0 +1,44 @@
+# Quickstart
+
+**Cairn runs entirely on your machine.** The memory database is local, needs no credentials, and
+makes no network call to read, write or search.
+
+## Install
+
+```
+python -m venv .venv && .venv/Scripts/activate
+pip install -r requirements.txt
+```
+
+## Prove the store works
+
+This blocks outbound sockets before it starts, so "offline with no credentials" is tested rather
+than claimed.
+
+```
+python scripts/verify_memory.py
+```
+
+It exercises all five tiers and tenant isolation against a fresh database, and exits non-zero if any
+of them behaves differently from what the adapter assumes.
+
+## Index a counterparty set
+
+```
+python -m apps.agent.observe.base --bootstrap
+```
+
+Cursor-based and resumable. An observation is keyed by a hash of the raw log, so a second run over
+the same block range writes nothing new.
+
+## Judge it, then serve it
+
+```
+python scripts/summarise.py --db data/memory.db
+python -m uvicorn apps.agent.api.main:app --port 8000
+```
+
+## The free tier
+
+The free tier caps the database at 5,242,880 bytes and the SDK enforces it. The indexed set is
+scoped to fit rather than truncated quietly. If a run stops at the cap it says so and stops cleanly.

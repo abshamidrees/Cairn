@@ -1,0 +1,61 @@
+# Attestations
+
+**A verdict published on Base, so the record survives outside Cairn.** There is no separate
+attestation endpoint: an attestation is a fact about a counterparty, so it comes back on the
+dossier.
+
+```
+GET /v1/dossier/{address}
+```
+
+```
+"attestation": {
+  "tx_hash": "0x...",
+  "explorer_url": "https://basescan.org/tx/0x...",
+  "contract": "0x...",
+  "chain_id": 8453
+}
+```
+
+`attestation` is `null` until a verdict has actually been published. Nothing is shown for a
+transaction that was never sent.
+
+## What goes on chain
+
+```
+attest(
+  address counterparty,
+  bytes32 standing,       keccak of grounded, thin, suspect or dormant
+  uint16  confidenceBps,  0 to 10000, so nothing is lost to floats
+  uint32  basisCount,
+  bytes32 basisHash,      keccak over the sorted observation ids
+  uint64  evaluatedAt
+)
+```
+
+The basis hash is taken over sorted observation ids, so a reader holding the dossier can recompute
+it and prove the published verdict is the one Cairn held. Sorting matters: the hash must not depend
+on the order rows came back from the database.
+
+## What will not be published
+
+The contract reverts a grounded verdict with a zero basis count, and the encoder refuses the same
+thing one layer earlier. Publishing an unevidenced claim about a named third party to a public chain
+cannot be taken back, so the rule is enforced twice.
+
+## Publishing one
+
+```
+python scripts/publish_attestation.py --dry-run --agent 0x01f9...84d3
+python scripts/publish_attestation.py --deploy
+python scripts/publish_attestation.py --agent 0x01f9...84d3 --contract 0x...
+```
+
+The dry run prints exactly what would be sent without sending it.
+
+## Why not the reputation registry
+
+ERC-8004's own reputation registry has an unverified implementation, and the selector observed on
+the wire does not match any signature we could reconstruct. Calling an unverified contract with a
+guessed signature to publish a judgment about a real third party is not a risk worth taking, so
+Cairn publishes into a contract small enough to read in a minute instead.

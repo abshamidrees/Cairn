@@ -1,0 +1,41 @@
+# How Cairn promotes and decays
+
+**A pattern seen once stays in the journal. Seen three times, it becomes a durable fact.** The
+migration between tiers is itself recorded, so a reader can find the moment a pattern stopped being
+a coincidence.
+
+```
+PROMOTION_THRESHOLD  3
+DECAY_DAYS           90
+```
+
+## Promotion
+
+Three occurrences of one pattern inside the decay window promote it to a WARM entity carrying
+`first_seen`, `last_seen` and `n`. Cairn then writes a journal event recording the promotion.
+
+Occurrences are counted on each observation's own timestamp, not on the journal's write time, so
+backfilling an index cannot promote a pattern whose evidence is already stale.
+
+Three, not two, because in this dataset two is coincidence.
+
+## Contradiction
+
+When a new observation disagrees with a durable fact, the entity is overwritten. Uniqueness on
+(tenant, category, name) means it cannot drift into two versions. Both the old and the new value go
+to the journal, so the change stays auditable even though the entity keeps no history of its own.
+
+## Demotion
+
+A fact whose supporting observations have all aged past the window is archived with
+`reason="evidence aged out"`, not deleted. We stopped seeing it is not the same claim as it stopped
+being true, and a reader should be able to tell those apart.
+
+## The session baton
+
+`write_event(evaluated=..., acted=..., forward=...)` carries what the next session must pick up:
+counterparties due for re-check, claims awaiting corroboration, claimants whose weight is still
+provisional. Cairn's first act on boot is to drain it.
+
+The baton carries news. An unchanged verdict hands nothing forward, because re-handing identical
+work on every sweep grows an append-only journal without bound for no new information.

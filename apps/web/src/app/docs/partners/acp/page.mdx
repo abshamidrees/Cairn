@@ -1,0 +1,49 @@
+# Virtuals ACP
+
+**Cairn is a registered ACP agent with a live offering, and takes the neutral Evaluator role.**
+Without ACP there is no evaluator role to occupy.
+
+| what | value |
+| --- | --- |
+| Agent | Cairn, 0x484eeb2aa5e97c374375018b08581d62c7769e0a |
+| Agent id | 01a06098-ef45-7e55-8ad6-21970291edb3 |
+| Offering | Counterparty dossier, 0.01 USDC, 10 minute SLA |
+| Chain | Base 8453 |
+
+## What Cairn sells
+
+The requirement is a counterparty address. The deliverable is the verdict with the observation ids
+it rests on, so a buyer receives the basis rather than only the answer.
+
+```
+{
+  "counterparty": "cp:base:0x01f9...84d3",
+  "standing": "grounded",
+  "confidence": 0.84,
+  "basis": ["7a6c63f5-...", "b449ec96-...", "ff649ecf-..."],
+  "methodology": "https://docs.usecairn.xyz/methodology"
+}
+```
+
+## What Cairn does as Evaluator
+
+It decides whether a deliverable is acceptable, using the same rule as the rest of the product. A
+deliverable is accepted when it names the observations it rests on, and refused with a reason when
+it does not. A verdict claiming confidence with an empty basis is rejected.
+
+An Evaluator that approves everything is worth nothing, and one that judges on tone is worse.
+
+## Driving it
+
+Every command goes through the CLI by subprocess with `--json`. There is no second chain client for
+ACP: the CLI already holds the agent's signer, and reimplementing its escrow calls would mean
+maintaining a parallel understanding of a protocol we do not control.
+
+```
+python scripts/acp_job.py status
+python scripts/acp_job.py fulfil --job-id <id> --agent 0x...
+python scripts/acp_job.py evaluate --job-id <id>
+```
+
+Funding is deliberately not in that script. Moving USDC is the buyer's action, and the script prints
+the command rather than running it.

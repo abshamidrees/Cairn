@@ -1,0 +1,37 @@
+# Observation
+
+**An observation is one event Cairn watched happen and hashed.** Not a rating somebody left, but an
+event read from the chain and keyed by a hash of the raw log.
+
+```
+kind          erc8004_feedback
+source        base:0x8004BAa17C55a88189AE136b182e5fdA19dE9b63
+content_hash  sha256:9cc1136c08a...
+tx_hash       0x48a0875f7f61b39015a5773bf620b0413234e0134cb335d569786de3c3f2614a
+```
+
+## The kinds Cairn currently holds
+
+Three, all read from the ERC-8004 registries on Base 8453.
+
+| kind | what it records |
+| --- | --- |
+| erc8004_registration | an agent registered, with its owner and registration file |
+| erc8004_feedback | a claimant left feedback about an agent |
+| erc8004_claim | the same event, filed in the claimant's own dossier |
+
+The design anticipated ACP job completions and x402 settlements as well. The indexer reads the
+registries, so those are what exist. Cairn shows three kinds and says three.
+
+## Why the hash matters
+
+Idempotency is a SHA-256 over the raw log, checked against the journal itself, because an
+observation is a fact and the journal is the seen-set. Re-indexing a range writes nothing new. It
+also lets a reader holding the dossier verify that a published verdict rests on the observations
+Cairn says it does.
+
+## What is deliberately not decoded
+
+The feedback event carries three integers whose meaning is not published anywhere checkable. They
+are stored under `unresolved` rather than given names like "score". Guessing a field name and then
+judging a real agent on the guess is how a counterparty gets called suspect for no reason.

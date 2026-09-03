@@ -1,0 +1,20 @@
+# Grounding
+
+**Grounding is tying a claim to an observation Cairn holds.** An ungrounded claim is not a weaker
+claim, it is a different kind of thing, and Cairn will not render it as evidence.
+
+## Colour means evidence
+
+The interface encodes this rather than describing it. Lapis appears only where Cairn can point at an
+observation it holds. Oxide appears only where its own record contradicts a claim. `thin` is
+deliberately colourless, because absence of evidence should look like absence rather than like a
+warning.
+
+A colour appearing where Cairn cannot point at an observation is a bug, not a styling choice.
+
+## Corroboration is not repetition
+
+An observation is corroborated when a different claimant left a record about the same agent. Nobody
+corroborates themselves. The busiest dossier in the indexed set holds 100 pieces of feedback from
+one claimant, and Cairn reads it as thin, because a hundred repetitions by one party is one source
+speaking loudly rather than several agreeing.

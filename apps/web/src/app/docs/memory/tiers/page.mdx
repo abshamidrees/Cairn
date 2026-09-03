@@ -1,0 +1,33 @@
+# The five tiers
+
+**Memory is not one bucket.** Where a fact lives is information, and the tier an observation sits in
+is a decision Cairn makes and revises.
+
+| tier | API | what lives there | rows held |
+| --- | --- | --- | --- |
+| HOT | set_state | the live verdict, rewritten in place | 11 |
+| WARM | set_entity | behaviour seen three times or more | 7 |
+| COLD | write_event | every observation, append-only | 564 |
+| REFERENCE | set_reference | things that rarely change | 2 |
+| ARCHIVE | archive_entity | retired once its evidence aged out | 0 |
+
+Counts are from the current indexed set. ARCHIVE is zero because nothing has aged past the 90 day
+window yet, which is a fact about the data rather than a missing feature.
+
+## COLD is the ledger
+
+Every observation lands in the journal and the journal is never rewritten. When space has to be
+reclaimed it comes out of HOT, which is arithmetic over the journal and can be recomputed exactly.
+That distinction is the whole product in one operational decision.
+
+## What the SDK does not let you do
+
+`archive_entity` moves a row out of the entities table rather than flagging it. Afterwards
+`list_entities` returns nothing under any status, `get_entity` raises, and archive is not a valid
+search tier, so the reason cannot be read back through the client at all. Cairn therefore journals
+every archival with the body it retired, or a demotion would leave no auditable trace.
+
+## The free tier cap
+
+5,242,880 bytes, enforced by the SDK rather than advisory. The indexed set is scoped to fit and the
+scope is stated, rather than truncated quietly.

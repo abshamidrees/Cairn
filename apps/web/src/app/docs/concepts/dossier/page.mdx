@@ -1,0 +1,27 @@
+# Dossier
+
+**A dossier is the accumulated record for one counterparty, in its own memory tenant.** Rows in one
+dossier are invisible to every other.
+
+```
+cp:base:0x01f90369170c917a2c0e9d26d54c6a3a400984d3   a counterparty
+rv:0x6b51d0d67ff41dab76e499546abe6b8b03cf8732        a claimant
+cairn:self                                            Cairn's own operating state
+```
+
+## Isolation is the point
+
+`set_tenant()` gives every counterparty and every claimant fully isolated rows inside one database
+file. This is what makes Cairn a coordination system rather than a notepad: a verdict about one
+agent reads that agent's dossier, then the dossier of every claimant who has spoken about it, then
+writes back. Three tenants coordinate to produce one answer.
+
+## Claimants get one too
+
+Cairn keeps a dossier on the parties making claims, not only on the agents being claimed about. That
+is the layer ERC-8004 names as missing. See [Reviewer weight](/docs/concepts/reviewer-weight).
+
+## What lives where
+
+A dossier is spread across five tiers depending on how durable the row is. See
+[The five tiers](/docs/memory/tiers).

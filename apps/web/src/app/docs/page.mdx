@@ -1,0 +1,36 @@
+# What Cairn is
+
+**Cairn is a memory-native trust layer for agent commerce.** It watches real interactions on Base,
+keeps an isolated record per counterparty, and answers one question: has this counterparty done what
+it said it would before?
+
+Every answer carries the observations it rests on. Nothing is asserted without showing what it
+stands on.
+
+## The problem it answers
+
+On Base, 90.6% of ERC-8004 reviewers show coordinated Sybil behaviour, 86.8% of rated agents have no
+valid feedback once it is stripped, and a reputation can be moved for a median of $0.0027. The
+ERC-8004 specification defers the fix to a reviewer reputation layer that, in its own words, does not
+yet exist.
+
+Source: Xiong et al., arXiv:2606.26028, independently verifiable.
+
+Cairn is that layer. It scores claimants by whether anyone else independently witnessed the same
+agent, and grounds every verdict in an event it read from the chain itself.
+
+## What it is not
+
+Cairn does not compute a reputation score, a rating, or a star count. Those are the broken things it
+replaces, and using their vocabulary concedes the argument. It returns a **standing**, a
+**confidence** and a **basis**.
+
+It also never asks a language model what it thinks. The verdict is arithmetic over the record. A
+sentence of English may be rendered from a verdict for a human reader, but the decision is
+computed, and running it twice over the same record returns the same answer.
+
+## Where to go next
+
+- [Quickstart](/docs/quickstart) runs it from a clean clone
+- [Ask about a counterparty](/docs/ask) is the one call you need before funding an escrow
+- [The five tiers](/docs/memory/tiers) is where the memory architecture lives

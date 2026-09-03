@@ -1,0 +1,40 @@
+# The deletion test
+
+**Remove the memory layer, and Cairn stops being able to answer.** The hackathon's gate is whether
+that is true, so Cairn ships the tool that checks it.
+
+```
+python scripts/deletion_test.py --agent 0x01f9...84d3 --db data/memory.db
+```
+
+Real output against the indexed set:
+
+```
+  memory ON      standing=grounded  confidence=0.84  basis=3  observations
+  memory OFF     standing=thin      confidence=-     basis=0  observations
+                 verdict engine returned NO_BASIS
+
+  Cairn's core function is unavailable without the memory layer.  PASS
+```
+
+## How the swap works
+
+`evaluate()` takes a `Store`. `MemoryStore` reads the record; `NullStore` satisfies the same
+interface with empty reads and no-op writes. The swap is one line at the call site, not a branch
+inside the engine, which is why the adapter boundary is enforced by a test that parses imports.
+
+## What counts as failure
+
+The run exits non-zero if the memory-off side returns any standing other than thin, any confidence
+at all, or a single observation in the basis. Each of those would mean the engine found something to
+say without the record.
+
+## Try it in the browser
+
+Every read endpoint takes `?memory=off`, and it is a real bypass at the adapter boundary rather than
+an empty state faked in the front end. Open the network tab and compare:
+
+```
+curl -s "localhost:8000/v1/lookup/0x01f9...84d3"
+curl -s "localhost:8000/v1/lookup/0x01f9...84d3?memory=off"
+```

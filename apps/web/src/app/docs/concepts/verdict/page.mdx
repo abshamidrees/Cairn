@@ -1,0 +1,41 @@
+# Verdict and basis
+
+**A verdict is Cairn's current judgment about one counterparty, carrying a confidence and a basis.**
+The basis is the list of observations the judgment rests on.
+
+```
+standing     grounded
+confidence   0.84
+basis        3 observations
+```
+
+## It is arithmetic, not a model call
+
+Nothing in the decision path calls a language model. The engine loads the prior from HOT state,
+pulls the observations from COLD, weighs each by recency and by who surfaced it, and computes a
+standing. Running it twice over the same record returns the same answer.
+
+A sentence of English may be rendered from a verdict for a human reader. That is presentation. A
+test parses the judge package to assert no model client is imported there.
+
+## The confidence formula
+
+```
+confidence = clamp(0.40 * min(distinct_sources / 5, 1)
+                 + 0.35 * (corroborated / n)
+                 + 0.25 * max(0, 1 - age_days / 90)
+                 - 0.25 * contradictions)
+```
+
+Volume counts distinct sources, not observations. Raw count is the cheapest quantity on this chain
+to manufacture, so pricing confidence by it would make confidence purchasable.
+
+## null is not zero
+
+`confidence: null` means there was no record at all. `confidence: 0.0` means Cairn looked and found
+the record worthless. The two are different answers and never render the same.
+
+## The prior
+
+Every verdict carries what Cairn believed before it. That is what makes a verdict a position that
+changed for a reason rather than a guess, and the explorer shows it on its own panel.

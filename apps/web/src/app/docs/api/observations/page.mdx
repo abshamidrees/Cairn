@@ -1,0 +1,45 @@
+# Observations
+
+**Returns the raw journal for one counterparty, oldest first.** This is the ledger behind a verdict,
+without the arithmetic on top.
+
+```
+GET /v1/observations/{address}?chain=base&memory=on
+```
+
+## Request
+
+```
+curl -s localhost:8000/v1/observations/0x01f90369170c917a2c0e9d26d54c6a3a400984d3
+```
+
+## Response
+
+```
+{
+  "counterparty": "cp:base:0x01f90369170c917a2c0e9d26d54c6a3a400984d3",
+  "memory": "on",
+  "observations": [
+    {
+      "id": "7a6c63f5-03af-429a-b34e-347d1fd54921",
+      "kind": "erc8004_feedback",
+      "pattern": "feedback-tagged:miner-vouch",
+      "source": "base:0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "content_hash": "sha256:9cc1136c08ae20550bf44898ae6f7f316a7ced0ad5b...",
+      "occurred_at": "2026-09-02T13:51:03.485Z",
+      "reviewer": "0xa3279f744438f83bc75ce9f8a8282c448f97cc8a",
+      "body": { "agent_id": 25975, "client": "0xa3279f...", "tx_hash": "0x48a0..." }
+    }
+  ]
+}
+```
+
+## Related
+
+- `GET /v1/dossier/{address}` returns the same observations arranged by tier, with the verdict and
+  any attestation. It is what the explorer draws the Stack from.
+- `GET /v1/reviewer/{address}` returns a claimant's own dossier.
+- `GET /v1/stats` returns what Cairn currently holds across the whole indexed set.
+- `GET /v1/recent` returns the last few counterparties looked up, read from Cairn's own dossier
+  rather than from a browser.
+- `GET /v1/health` returns the database path in use.

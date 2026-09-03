@@ -1,0 +1,38 @@
+# Ask about a counterparty
+
+**One call, before the escrow is funded.** If Cairn has not watched the counterparty do what it said
+it would, it says so, and the basis comes back with the answer.
+
+```
+curl -s localhost:8000/v1/lookup/0x01f90369170c917a2c0e9d26d54c6a3a400984d3
+```
+
+## Branch on the answer
+
+```
+verdict = cairn.lookup("0x01f9...84d3")
+if verdict.standing != "grounded":
+    raise Refuse(verdict.basis)      # nothing witnessed, so do not pay
+escrow.fund(job_id)
+```
+
+The same decision from a shell:
+
+```
+curl -s "$CAIRN/v1/lookup/0x01f9...84d3" \
+  | jq -e '.standing == "grounded"' \
+  && acp client fund --job-id 42 --chain-id 8453 \
+  || echo "no grounded record, holding the escrow"
+```
+
+## What comes back
+
+A standing, a confidence, and the observation ids the verdict used. See
+[Verdict and basis](/docs/concepts/verdict) for the shape, and [Lookup](/docs/api/lookup) for the
+full response.
+
+## Reading the empty answer correctly
+
+A `thin` standing with an empty basis means Cairn has never watched this agent do anything. It does
+not mean the agent behaved badly. Treating absence as a red flag is the failure this project exists
+to avoid, and Cairn will not do it on your behalf.
