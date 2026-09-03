@@ -7,6 +7,10 @@ sibyl-memory-cli==0.4.0
 web3==8.0.0
 eth-abi==6.0.0
 
+# Compiles packages/chain/contracts/CairnAttestations.sol. solc itself is
+# fetched on demand, so a clean clone needs no toolchain installed first.
+py-solc-x==2.0.4
+
 # The read API. uvicorn serves it; httpx is what starlette's TestClient
 # drives the endpoints with in tests/test_api.py.
 fastapi==0.141.1

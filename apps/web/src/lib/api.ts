@@ -34,8 +34,18 @@ export interface VerdictPayload {
   readonly sources_unavailable: readonly string[];
 }
 
+export interface Attestation {
+  /** The Base transaction that published this verdict. */
+  readonly tx_hash: string;
+  readonly explorer_url: string;
+  readonly contract: string | null;
+  readonly chain_id: number | null;
+}
+
 export interface Dossier {
   readonly counterparty: string;
+  /** Null until a verdict has actually been published on Base. */
+  readonly attestation: Attestation | null;
   readonly memory: "on" | "off";
   readonly verdict: VerdictPayload;
   readonly tiers: readonly Tier[];

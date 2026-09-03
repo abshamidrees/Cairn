@@ -205,8 +205,27 @@ def _dossier_payload(store: Store, chain: str, address: str, memory: str) -> dic
 
     grounded = sum(1 for s in stones["COLD"] if s["grounding"] == "grounded")
 
+    # What Cairn published about this counterparty on Base, if anything. An
+    # attestation is a fact about the agent, so it is read out of the dossier
+    # rather than out of a side table the verdict cannot see.
+    with store.use(tenant):
+        published = store.fact("attestation", "latest")
+        contract = store.reference("attestation-contract")
+    attestation: dict[str, Any] | None = None
+    if published is not None:
+        body = published.get("body")
+        tx = body.get("value") if isinstance(body, dict) else None
+        if isinstance(tx, str) and tx:
+            attestation = {
+                "tx_hash": tx,
+                "explorer_url": f"https://basescan.org/tx/{tx}",
+                "contract": (contract or {}).get("address"),
+                "chain_id": (contract or {}).get("chain_id"),
+            }
+
     return {
         "counterparty": tenant,
+        "attestation": attestation,
         "memory": "off" if memory == "off" else "on",
         "verdict": verdict.as_payload(),
         "tiers": TIERS,
