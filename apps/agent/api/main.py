@@ -25,6 +25,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from apps.agent.judge.verdict import Verdict, evaluate
 from apps.agent.memory.store import (
+    SELF_TENANT,
     MemoryStore,
     NullStore,
     Store,
@@ -222,13 +223,38 @@ def health() -> dict[str, Any]:
     return {"status": "ok", "db": DEFAULT_DB}
 
 
+@app.get("/v1/stats")
+def stats(memory: str = Query("on", pattern="^(on|off)$")) -> dict[str, Any]:
+    """What Cairn currently holds, read from its own dossier.
+
+    Written by scripts/summarise.py into `cairn:self`, the tenant reserved for
+    Cairn's own operating state. Every figure the landing page shows comes from
+    here, so a number on the page is a count of rows in the database rather than
+    a constant in a template. With memory off there is nothing to report, which
+    is the honest answer and the one the page renders.
+    """
+    with _store_for(memory) as store, store.use(SELF_TENANT):
+        summary = store.reference("site-summary")
+    if summary is None:
+        return {"memory": "off" if memory == "off" else "on", "available": False}
+    return {"memory": "off" if memory == "off" else "on", "available": True, **summary}
+
+
 @app.get("/v1/lookup/{address}")
 def lookup(
     address: str,
     chain: str = "base",
     memory: str = Query("on", pattern="^(on|off)$"),
 ) -> dict[str, Any]:
-    """The verdict for one counterparty, with the basis it rests on."""
+    """The verdict for one counterparty, with the basis it rests on.
+
+    Read-only. An earlier version recorded the verdict here, on the reasoning
+    that a lookup is what makes one live. That was wrong: the free tier has a
+    hard cap, and a GET that writes turns a full database into a 500 on every
+    read. A verdict is arithmetic over the journal and can be recomputed at any
+    time, so the read path never needs to persist it. Writes happen where they
+    can be allowed to fail: scripts/summarise.py and the agent's own loop.
+    """
     with _store_for(memory) as store:
         verdict = evaluate(store, chain, address, write=False)
     return {

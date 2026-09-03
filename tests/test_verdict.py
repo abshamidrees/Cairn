@@ -457,3 +457,47 @@ def test_write_false_leaves_the_record_untouched(store: MemoryStore) -> None:
 
     with store.use(counterparty_tenant("base", SUBJECT)):
         assert store.verdict() is None
+
+
+# ---- the baton carries news, not a heartbeat -----------------------------
+
+
+def test_re_evaluating_an_unchanged_verdict_hands_nothing_forward(store: MemoryStore) -> None:
+    """A periodic sweep must not grow the journal for saying the same thing.
+
+    HOT is rewritten in place and costs nothing, but the baton is a journal
+    event and the journal is append-only. Re-handing identical work on every
+    pass walked the real database into the free tier's 5,242,880 byte cap.
+    """
+    seed(store, feedback(CLIENT_A))
+
+    evaluate(store, "base", SUBJECT, now=NOW, write=True)
+    with store.use(counterparty_tenant("base", SUBJECT)):
+        first = len(store.observations())
+        drained = store.drain_forward()
+    assert drained, "a thin dossier should ask to be rechecked at least once"
+
+    # Same record, same verdict. Nothing new to tell anyone.
+    for _ in range(3):
+        evaluate(store, "base", SUBJECT, now=NOW, write=True)
+
+    with store.use(counterparty_tenant("base", SUBJECT)):
+        assert len(store.observations()) == first, "the journal grew for no new information"
+        assert store.drain_forward() == []
+
+
+def test_a_changed_verdict_still_hands_work_forward(store: MemoryStore) -> None:
+    """The guard must not silence a baton that actually has news in it."""
+    seed(store, feedback(CLIENT_A))
+    evaluate(store, "base", SUBJECT, now=NOW, write=True)
+    with store.use(counterparty_tenant("base", SUBJECT)):
+        store.drain_forward()
+
+    # New corroborating evidence moves it from thin to grounded.
+    seed(store, feedback(CLIENT_B), feedback(CLIENT_C))
+    verdict = evaluate(store, "base", SUBJECT, now=NOW, write=True)
+    assert verdict.standing == "grounded"
+
+    with store.use(counterparty_tenant("base", SUBJECT)):
+        # Grounded hands no recheck, but the provisional reviewers still count.
+        assert store.verdict() is not None

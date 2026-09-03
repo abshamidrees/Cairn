@@ -109,7 +109,7 @@ export function Stack({
           const inBand = stones[tier] ?? [];
           return (
             <div key={tier} className="flex items-start gap-4">
-              <span className="w-[5.5rem] shrink-0 pt-1 font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-scree">
+              <span className="w-[5.5rem] shrink-0 pt-1 font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
                 {tier}
               </span>
               <div className="flex min-h-[1.25rem] flex-1 flex-col items-start gap-1.5">
@@ -140,7 +140,7 @@ export function Stack({
       </div>
 
       <div className="flex flex-col gap-3 border-t border-seam pt-4">
-        <p className="font-mono text-[0.8125rem] tabular-nums text-scree">
+        <p className="font-mono text-[0.8125rem] tabular-nums text-slate">
           {counts.observations} observations · {counts.grounded} grounded
         </p>
         <VerdictLine standing={standing} confidence={confidence} noBasis={noBasis} />
@@ -184,7 +184,7 @@ export function MemoryToggle({
           }`}
         />
       </button>
-      <span className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-scree">
+      <span className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
         memory
       </span>
     </label>

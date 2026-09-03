@@ -181,6 +181,14 @@ class Store(Protocol):
 
     def archived(self) -> list[dict[str, Any]]: ...
 
+    def dossiers(self, prefix: str = "") -> list[str]: ...
+
+    def tier_counts(self) -> dict[str, int]: ...
+
+    def compact(self) -> int: ...
+
+    def clear_derived_state(self) -> int: ...
+
     def archive_stale(self, *, now: datetime | None = None) -> list[Archived]: ...
 
     def put_reference(self, key: str, body: Mapping[str, Any]) -> None: ...
@@ -350,6 +358,75 @@ class MemoryStore:
                 out.append({"id": str(event["id"]), "ts": str(event["ts"]), **record})
         return out
 
+    def dossiers(self, prefix: str = "") -> list[str]:
+        """Every tenant that holds at least one journalled row.
+
+        The SDK has no tenant listing, so this reads the store directly. It stays
+        in this module because that is the rule: nothing else touches the SDK,
+        and a caller that needed the row store would be reaching around the
+        boundary the deletion test depends on.
+        """
+        with self._m.storage.connection() as con:
+            rows = con.execute(
+                "SELECT DISTINCT tenant_id FROM journal_events ORDER BY tenant_id"
+            ).fetchall()
+        return [str(row[0]) for row in rows if str(row[0]).startswith(prefix)]
+
+    def tier_counts(self) -> dict[str, int]:
+        """How many rows Cairn currently holds in each tier, across every dossier.
+
+        This is the five-tier policy made countable. An empty tier is reported as
+        zero rather than hidden: nothing has aged out yet, and saying so is more
+        informative than an omitted row.
+        """
+        # Written out rather than interpolated: a table name spliced into SQL
+        # is the shape of an injection even when the input is a local literal,
+        # and these are the only five tables the tier policy has.
+        queries = (
+            ("COLD", "SELECT COUNT(*) FROM journal_events"),
+            ("WARM", "SELECT COUNT(*) FROM entities"),
+            ("HOT", "SELECT COUNT(*) FROM state_documents"),
+            ("REFERENCE", "SELECT COUNT(*) FROM reference_documents"),
+            ("ARCHIVE", "SELECT COUNT(*) FROM archived_entities"),
+        )
+        counts: dict[str, int] = {}
+        with self._m.storage.connection() as con:
+            for tier, query in queries:
+                counts[tier] = int(con.execute(query).fetchone()[0])
+        return counts
+
+    def compact(self) -> int:
+        """Reclaim pages the SDK's own indexes left behind. Returns bytes freed.
+
+        Rewriting HOT in place still churns the FTS shadow tables, and on the
+        free tier that churn is what walks a working database into its
+        5,242,880 byte cap. This deletes nothing: it is SQLite housekeeping, and
+        the journal it leaves behind is byte for byte the same ledger.
+        """
+        before = int(self._m.free_tier_status().get("db_size_bytes", 0))
+        with self._m.storage.connection() as con:
+            con.execute("VACUUM")
+        after = int(self._m.free_tier_status().get("db_size_bytes", 0))
+        return max(0, before - after)
+
+    def clear_derived_state(self) -> int:
+        """Drop every HOT verdict. Returns how many were dropped.
+
+        HOT is the one tier Cairn can afford to lose. A verdict is arithmetic
+        over the journal, so any of these can be recomputed exactly by asking
+        again; the ledger they were derived from is untouched. That is what
+        makes this safe where deleting an observation would not be.
+
+        It exists because rewriting HOT churns the SDK's FTS indexes, and on the
+        free tier that churn is what fills the 5,242,880 byte cap.
+        """
+        with self._m.storage.connection() as con:
+            dropped = int(
+                con.execute("SELECT COUNT(*) FROM state_documents").fetchone()[0]
+            )
+            con.execute("DELETE FROM state_documents")
+        return dropped
+
     def assert_fact(
         self, category: str, name: str, value: JsonValue, *, observation_id: str
     ) -> Contradiction | None:
@@ -423,7 +500,10 @@ class MemoryStore:
     # ---- REFERENCE -------------------------------------------------------
 
     def put_reference(self, key: str, body: Mapping[str, Any]) -> None:
-        self._m.set_reference(key, dict(body))
+        try:
+            self._m.set_reference(key, dict(body))
+        except CapExceededError as exc:
+            raise MemoryCapReachedError(str(exc)) from exc
 
     def reference(self, key: str) -> dict[str, Any] | None:
         held = self._m.get_reference(key)
@@ -441,7 +521,10 @@ class MemoryStore:
 
     def put_verdict(self, body: Mapping[str, Any]) -> None:
         """Rewritten in place. The journal keeps the history, this does not."""
-        self._m.set_state("verdict", dict(body))
+        try:
+            self._m.set_state("verdict", dict(body))
+        except CapExceededError as exc:
+            raise MemoryCapReachedError(str(exc)) from exc
 
     def verdict(self) -> dict[str, Any] | None:
         return self._state_body("verdict")
@@ -527,6 +610,19 @@ class NullStore:
 
     def archived(self) -> list[dict[str, Any]]:
         return []
+
+    def dossiers(self, prefix: str = "") -> list[str]:
+        del prefix
+        return []
+
+    def tier_counts(self) -> dict[str, int]:
+        return {"ARCHIVE": 0, "REFERENCE": 0, "COLD": 0, "WARM": 0, "HOT": 0}
+
+    def compact(self) -> int:
+        return 0
+
+    def clear_derived_state(self) -> int:
+        return 0
 
     def archive_stale(self, *, now: datetime | None = None) -> list[Archived]:
         del now

@@ -514,9 +514,31 @@ def evaluate(
     return verdict
 
 
+def _unchanged(verdict: Verdict) -> bool:
+    """True when this verdict says exactly what the prior one already said."""
+    prior = verdict.prior
+    if not isinstance(prior, dict):
+        return False
+    return (
+        prior.get("standing") == verdict.standing
+        and prior.get("confidence") == verdict.confidence
+        and len(prior.get("basis") or []) == len(verdict.basis)
+    )
+
+
 def _record(store: Store, verdict: Verdict) -> None:
-    """Write the verdict to HOT and journal the evaluation that produced it."""
+    """Write the verdict to HOT and hand the next session what changed.
+
+    HOT is rewritten in place, so re-evaluating costs nothing there. The baton
+    is different: it is a journal event, and the journal is append-only. Handing
+    the same work forward on every sweep would grow COLD without bound and, on
+    the free tier, walk the database into its 5,242,880 byte cap for no new
+    information. The baton carries news, so an unchanged verdict hands nothing.
+    """
     store.put_verdict(verdict.as_payload())
+
+    if _unchanged(verdict):
+        return
 
     forward: list[dict[str, Any]] = []
     for contradiction in verdict.contradictions:

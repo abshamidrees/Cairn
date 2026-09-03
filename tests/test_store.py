@@ -347,3 +347,51 @@ def test_null_store_reads_empty_and_writes_nothing() -> None:
         assert null.verdict() is None
         assert null.drain_forward() == []
         assert null.archive_stale() == []
+
+
+# ---- maintenance, and what may never be maintained away ------------------
+
+
+def test_tier_counts_reports_all_five_tiers(store: MemoryStore) -> None:
+    with store.use(ALICE):
+        for i in range(PROMOTION_THRESHOLD):
+            store.record_observation(observation(at=BASE + timedelta(days=i)))
+        store.put_verdict({"standing": "grounded"})
+        store.put_reference("scoring-policy", {"version": "0.1.0"})
+
+    counts = store.tier_counts()
+    assert set(counts) == {"ARCHIVE", "REFERENCE", "COLD", "WARM", "HOT"}
+    assert counts["COLD"] > 0
+    assert counts["WARM"] == 1
+    assert counts["HOT"] == 1
+    assert counts["REFERENCE"] == 1
+
+
+def test_clearing_derived_state_leaves_the_ledger_untouched(store: MemoryStore) -> None:
+    """HOT is recomputable, so it can be dropped. COLD is the record, so it cannot.
+
+    This is the line the free-tier cap forced us to draw: when space has to be
+    reclaimed, it comes out of what can be derived again, never out of what was
+    witnessed.
+    """
+    with store.use(ALICE):
+        for i in range(PROMOTION_THRESHOLD):
+            store.record_observation(observation(at=BASE + timedelta(days=i)))
+        store.put_verdict({"standing": "grounded"})
+        before = len(store.observations())
+
+    assert store.clear_derived_state() == 1
+
+    with store.use(ALICE):
+        assert store.verdict() is None
+        assert len(store.observations()) == before, "clearing HOT must not touch the journal"
+        assert store.fact(BEHAVIOUR, "settles-escrow-on-time") is not None
+
+
+def test_dossiers_lists_each_tenant_once(store: MemoryStore) -> None:
+    for tenant in (ALICE, BOB):
+        with store.use(tenant):
+            store.record_observation(observation())
+
+    assert sorted(store.dossiers("cp:")) == sorted([ALICE, BOB])
+    assert store.dossiers("rv:") == []

@@ -140,8 +140,8 @@ export function BasisColumn({
   readonly children: ReactNode;
 }) {
   return (
-    <div className="border-l-0 border-seam md:border-l md:pl-8">
-      <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-scree">{label}</p>
+    <div className="min-w-0 border-l-0 border-seam md:border-l md:pl-8">
+      <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">{label}</p>
       <div className="mt-4 font-mono text-[0.8125rem] text-slate">{children}</div>
     </div>
   );
@@ -158,7 +158,7 @@ export function ClaimBasis({
 }) {
   return (
     <div className="grid gap-8 md:grid-cols-[58%_42%]">
-      <div>{claim}</div>
+      <div className="min-w-0">{claim}</div>
       <BasisColumn label={basisLabel}>{basis}</BasisColumn>
     </div>
   );
