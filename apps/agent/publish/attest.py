@@ -235,9 +235,21 @@ def record_attestation(
         )
 
 
+def _usable_rpc(value: str | None) -> str | None:
+    """`.env.example` ships BASE_RPC_URL as `https://...`, which is truthy.
+
+    An unfilled placeholder would otherwise be used as a real endpoint and fail
+    somewhere far from the cause, so it is treated as unset.
+    """
+    if not value:
+        return None
+    host = value.removeprefix("https://").removeprefix("http://").strip("/")
+    return value if host and host != "..." else None
+
+
 def attestor_from_env(rpc_url: str | None = None) -> Attestor:
     """Build an Attestor from the environment. The key is never logged."""
-    url = rpc_url or os.environ.get("BASE_RPC_URL") or "https://mainnet.base.org"
+    url = rpc_url or _usable_rpc(os.environ.get("BASE_RPC_URL")) or "https://mainnet.base.org"
     key = os.environ.get("CAIRN_ATTESTOR_KEY", "")
     contract = os.environ.get("CAIRN_ATTESTATION_CONTRACT") or None
     return Attestor(Web3(Web3.HTTPProvider(url)), key, contract)

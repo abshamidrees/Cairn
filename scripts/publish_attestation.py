@@ -23,9 +23,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from apps.agent.env import load as load_env
 from apps.agent.judge.verdict import evaluate
 from apps.agent.memory.store import MemoryStore
 from apps.agent.publish.attest import AttestationError, attestor_from_env, encode
+
+# Secrets live in .env.local; the scripts read os.environ. Bridge the two
+# before anything asks for a key.
+load_env()
 
 
 def main(argv: list[str] | None = None) -> int:

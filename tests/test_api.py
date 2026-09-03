@@ -122,3 +122,69 @@ def test_a_counterparty_never_seen_returns_an_honest_empty(client: TestClient) -
     assert body["counts"]["observations"] == 0
     assert body["verdict"]["standing"] == "thin"
     assert body["verdict"]["no_basis"] is True
+
+
+# ---- the claimant's own dossier ------------------------------------------
+
+
+def test_an_unknown_claimant_is_reported_as_unknown_not_as_bad(client: TestClient) -> None:
+    """Never having spoken is not evidence of anything."""
+    body = client.get("/v1/reviewer/0x00000000000000000000000000000000000000ff").json()
+    assert body["known"] is False
+    assert body["claims"] == []
+    assert body["weight"] is None
+
+
+def test_a_claimants_claims_come_from_their_own_dossier(client: TestClient) -> None:
+    body = client.get(f"/v1/reviewer/{SUBJECT}").json()
+    assert body["reviewer"].startswith("rv:")
+    assert body["address"] == SUBJECT.lower()
+
+
+def test_memory_off_empties_the_claimant_view_too(client: TestClient) -> None:
+    body = client.get(f"/v1/reviewer/{SUBJECT}?memory=off").json()
+    assert body["claims"] == []
+    assert body["weight"] is None
+
+
+# ---- recent lookups, kept in memory rather than a browser ----------------
+
+
+def test_a_lookup_is_remembered_in_cairns_own_dossier(client: TestClient) -> None:
+    """Part 8 asks for recent lookups in memory, not localStorage."""
+    assert client.get("/v1/recent").json()["recent"] == []
+
+    client.get(f"/v1/dossier/{SUBJECT}")
+    recent = client.get("/v1/recent").json()["recent"]
+
+    assert len(recent) == 1
+    assert recent[0].endswith(SUBJECT.lower())
+
+
+def test_the_same_counterparty_is_not_remembered_twice(client: TestClient) -> None:
+    for _ in range(3):
+        client.get(f"/v1/dossier/{SUBJECT}")
+    assert len(client.get("/v1/recent").json()["recent"]) == 1
+
+
+def test_memory_off_neither_records_nor_reports_a_lookup(client: TestClient) -> None:
+    client.get(f"/v1/dossier/{SUBJECT}?memory=off")
+    assert client.get("/v1/recent").json()["recent"] == []
+    assert client.get("/v1/recent?memory=off").json()["recent"] == []
+
+
+# ---- what the basis table needs ------------------------------------------
+
+
+def test_each_observation_carries_the_transaction_it_was_witnessed_in(
+    client: TestClient,
+) -> None:
+    """A basis row that cannot be followed back to Base is an assertion."""
+    body = client.get(f"/v1/dossier/{SUBJECT}").json()
+    for stone in body["stones"]["COLD"]:
+        assert "tx_hash" in stone["detail"]
+
+
+def test_the_verdict_carries_its_prior(client: TestClient) -> None:
+    """The prior panel is the screen that shows memory doing work."""
+    assert "prior" in client.get(f"/v1/dossier/{SUBJECT}").json()["verdict"]

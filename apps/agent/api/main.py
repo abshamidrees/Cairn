@@ -26,10 +26,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from apps.agent.judge.verdict import Verdict, evaluate
 from apps.agent.memory.store import (
     SELF_TENANT,
+    MemoryCapReachedError,
     MemoryStore,
     NullStore,
     Store,
     counterparty_tenant,
+    reviewer_tenant,
 )
 
 DEFAULT_DB = os.environ.get("SIBYL_DB") or "data/memory.db"
@@ -144,6 +146,8 @@ def _dossier_payload(store: Store, chain: str, address: str, memory: str) -> dic
                     "content_hash": item.content_hash,
                     "reviewer": item.reviewer,
                     "corroborated": item.corroborated,
+                    # So the basis is followable back to the chain it came from.
+                    "tx_hash": item.tx_hash,
                 },
             )
         )
@@ -242,6 +246,81 @@ def health() -> dict[str, Any]:
     return {"status": "ok", "db": DEFAULT_DB}
 
 
+RECENT_KEY = "recent-lookups"
+RECENT_LIMIT = 8
+
+
+def _remember_lookup(store: Store, tenant: str) -> None:
+    """Keep the last few lookups in Cairn's own dossier, not in a browser.
+
+    Part 8 asks for recent lookups persisted in memory rather than
+    localStorage, so they live in `cairn:self` where the rest of Cairn's
+    operating state does. HOT is rewritten in place, so this is bounded.
+
+    Best effort on purpose. A convenience list must never be the reason a read
+    fails, and the free tier's cap is a real thing that fires.
+    """
+    try:
+        with store.use(SELF_TENANT):
+            held = store.verdict() or {}
+            recent = held.get("recent_lookups")
+            rows: list[str] = (
+                [r for r in recent if isinstance(r, str)] if isinstance(recent, list) else []
+            )
+            rows = [tenant, *[r for r in rows if r != tenant]][:RECENT_LIMIT]
+            store.put_verdict({**held, "recent_lookups": rows})
+    except MemoryCapReachedError:
+        return
+
+
+@app.get("/v1/recent")
+def recent(memory: str = Query("on", pattern="^(on|off)$")) -> dict[str, Any]:
+    """The last few counterparties anyone looked up, from Cairn's own dossier."""
+    with _store_for(memory) as store, store.use(SELF_TENANT):
+        held = store.verdict() or {}
+    rows = held.get("recent_lookups")
+    return {
+        "memory": "off" if memory == "off" else "on",
+        "recent": [r for r in rows if isinstance(r, str)] if isinstance(rows, list) else [],
+    }
+
+
+@app.get("/v1/reviewer/{address}")
+def reviewer(
+    address: str,
+    memory: str = Query("on", pattern="^(on|off)$"),
+) -> dict[str, Any]:
+    """What a claimant has said, and how much of it anyone else witnessed.
+
+    The weight is read from the summary rather than recomputed, because a
+    reviewer's weight is only meaningful against the whole indexed set and a
+    number measured against one dossier would be a different number wearing the
+    same name.
+    """
+    tenant = reviewer_tenant(address)
+    with _store_for(memory) as store:
+        with store.use(tenant):
+            claims = [row for row in store.observations() if row.get("kind") == "erc8004_claim"]
+        with store.use(SELF_TENANT):
+            summary = store.reference("site-summary") or {}
+
+    detail = None
+    for row in summary.get("reviewers_detail") or []:
+        if isinstance(row, dict) and str(row.get("address", "")).lower() == address.lower():
+            detail = row
+            break
+
+    return {
+        "reviewer": tenant,
+        "address": address.lower(),
+        "memory": "off" if memory == "off" else "on",
+        "known": bool(claims) or detail is not None,
+        "claims": claims,
+        "weight": detail,
+        "generated_at": summary.get("generated_at"),
+    }
+
+
 @app.get("/v1/stats")
 def stats(memory: str = Query("on", pattern="^(on|off)$")) -> dict[str, Any]:
     """What Cairn currently holds, read from its own dossier.
@@ -291,7 +370,10 @@ def dossier(
 ) -> dict[str, Any]:
     """Everything Cairn holds about one counterparty, arranged by tier."""
     with _store_for(memory) as store:
-        return _dossier_payload(store, chain, address, memory)
+        payload = _dossier_payload(store, chain, address, memory)
+        if memory != "off":
+            _remember_lookup(store, payload["counterparty"])
+        return payload
 
 
 @app.get("/v1/observations/{address}")

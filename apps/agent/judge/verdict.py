@@ -113,6 +113,8 @@ class BasisItem:
     reviewer: str | None
     corroborated: bool
     weight: float
+    #: The transaction this was witnessed in, so a reader can follow it to Base.
+    tx_hash: str | None = None
 
     def as_payload(self) -> dict[str, Any]:
         return {
@@ -124,6 +126,7 @@ class BasisItem:
             "reviewer": self.reviewer,
             "corroborated": self.corroborated,
             "weight": round(self.weight, 4),
+            "tx_hash": self.tx_hash,
         }
 
 
@@ -195,6 +198,7 @@ class Verdict:
             "contradictions": [c.as_payload() for c in self.contradictions],
             "reviewers": [r.as_payload() for r in self.reviewers],
             "sources_unavailable": list(self.sources_unavailable),
+            "prior": self.prior,
             "no_basis": self.no_basis,
             "evaluated_at": self.evaluated_at,
         }
@@ -372,6 +376,7 @@ def _weigh(
             reviewer=reviewer_key,
             corroborated=corroborated,
             weight=_recency(occurred_at, now) * factor,
+            tx_hash=body.get("tx_hash") if isinstance(body.get("tx_hash"), str) else None,
         )
         tally.items.append(item)
         tally.sources.add(reviewer_key or "chain")

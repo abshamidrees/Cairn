@@ -26,6 +26,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from apps.agent.env import load as load_env
 from apps.agent.memory.store import MemoryStore
 from apps.agent.observe.acp import (
     CHAIN_ID,
@@ -35,6 +36,10 @@ from apps.agent.observe.acp import (
     build_deliverable,
     evaluate_deliverable,
 )
+
+# Secrets live in .env.local; the scripts read os.environ. Bridge the two
+# before anything asks for a key.
+load_env()
 
 
 def _deliverable_of(history: dict[str, Any]) -> object:

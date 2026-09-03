@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { CairnMark, type Standing } from "@/components/cairn-mark";
+import { CommandPalette } from "@/components/command-palette";
 
 /**
  * The page chrome, and the claim / basis split that carries every section.
@@ -38,6 +39,8 @@ export function Nav({ standing = "default", observations = null }: NavProps) {
         </ul>
 
         <div className="flex items-center gap-4">
+          {/* Cmd+K anywhere on the site, because the nav is on every page. */}
+          <CommandPalette />
           {/* If the API is down this disappears rather than showing a zero,
               because a zero would be a claim Cairn cannot support. */}
           {observations !== null ? (
@@ -78,6 +81,8 @@ export function Footer({ ticker = [] }: { readonly ticker?: readonly TickerEntry
     <footer className="bg-basalt text-chalk">
       <div className="mx-auto flex max-w-[78rem] flex-col gap-12 px-6 py-16 md:flex-row md:justify-between">
         <div className="flex items-center gap-4">
+          {/* Cmd+K anywhere on the site, because the nav is on every page. */}
+          <CommandPalette />
           <CairnMark standing="grounded" width={48} height={48} />
           <span className="font-display text-[2.5rem] leading-none tracking-[-0.02em]">Cairn</span>
         </div>

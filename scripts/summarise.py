@@ -27,9 +27,14 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from apps.agent.env import load as load_env
 from apps.agent.judge.methodology import published
 from apps.agent.judge.verdict import evaluate, reviewer_weight
 from apps.agent.memory.store import SELF_TENANT, MemoryCapReachedError, MemoryStore
+
+# Secrets live in .env.local; the scripts read os.environ. Bridge the two
+# before anything asks for a key.
+load_env()
 
 SUMMARY_KEY = "site-summary"
 POLICY_KEY = "scoring-policy"
@@ -49,6 +54,7 @@ def build(store: MemoryStore, *, write_limit: int = 0) -> dict[str, Any]:
     # meaningful against it, so it is computed once here.
     witnessed: dict[Any, set[str]] = defaultdict(set)
     witnessed_by_tenant: dict[str, set[str]] = defaultdict(set)
+    agents_of_tenant: dict[str, set[Any]] = defaultdict(set)
     kinds: Counter[str] = Counter()
     examples: dict[str, dict[str, Any]] = {}
     recent: list[dict[str, Any]] = []
@@ -65,6 +71,7 @@ def build(store: MemoryStore, *, write_limit: int = 0) -> dict[str, Any]:
                     if agent_id is not None and isinstance(client, str):
                         witnessed[agent_id].add(client.lower())
                         witnessed_by_tenant[tenant].add(client.lower())
+                        agents_of_tenant[tenant].add(agent_id)
                 if kind and kind not in examples:
                     examples[kind] = {
                         "kind": kind,
@@ -112,9 +119,12 @@ def build(store: MemoryStore, *, write_limit: int = 0) -> dict[str, Any]:
         key=lambda t: -len(witnessed_by_tenant.get(t, ())),
     )
     persist = set(ranked[:write_limit]) if write_limit > 0 else set()
+    agent_standing: dict[Any, str] = {}
     for tenant in counterparties:
         verdict = evaluate(store, "base", _address_of(tenant), write=tenant in persist)
         standings[verdict.standing] += 1
+        for agent_id in agents_of_tenant.get(tenant, ()):
+            agent_standing[agent_id] = verdict.standing
 
     # The published methodology belongs in REFERENCE: it changes rarely, and it
     # is the kind of thing a reader should be able to fetch rather than infer.
@@ -122,9 +132,21 @@ def build(store: MemoryStore, *, write_limit: int = 0) -> dict[str, Any]:
         store.put_reference(POLICY_KEY, published())
 
     weights = []
+    contradicted_by_reviewer: dict[str, int] = {}
     for tenant in reviewers:
-        weight = reviewer_weight(store, _address_of(tenant), witnessed=witnessed)
+        address = _address_of(tenant)
+        weight = reviewer_weight(store, address, witnessed=witnessed)
         weights.append(weight)
+        with store.use(tenant):
+            claims = [r for r in store.observations() if r.get("kind") == "erc8004_claim"]
+        contradicted = 0
+        for claim in claims:
+            body = claim.get("body")
+            if not isinstance(body, dict):
+                continue
+            if agent_standing.get(body.get("agent_id")) == "suspect":
+                contradicted += 1
+        contradicted_by_reviewer[address.lower()] = contradicted
     weights.sort(key=lambda w: (-w.claims, w.address))
 
     recent.sort(key=lambda row: row["at"], reverse=True)
@@ -142,12 +164,19 @@ def build(store: MemoryStore, *, write_limit: int = 0) -> dict[str, Any]:
             for name in ("grounded", "thin", "suspect", "dormant")
         },
         "reviewer_example": weights[0].as_payload() if weights else None,
+        "reviewers_detail": [
+            {**w.as_payload(), "contradicted": contradicted_by_reviewer.get(w.address, 0)}
+            for w in weights
+        ],
         "reviewers_provisional": sum(1 for w in weights if w.provisional),
         "recent": recent[:5],
     }
 
     with store.use(SELF_TENANT):
-        store.put_verdict({"summary": summary})
+        # cairn:self HOT is shared: the API keeps recent lookups there too, and
+        # a wholesale rewrite would silently drop them.
+        held = store.verdict() or {}
+        store.put_verdict({**held, "summary": summary})
         store.put_reference(SUMMARY_KEY, summary)
 
     return summary

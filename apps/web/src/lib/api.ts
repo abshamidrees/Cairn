@@ -25,6 +25,16 @@ export interface Stone {
   readonly detail: Readonly<Record<string, unknown>>;
 }
 
+/** What Cairn believed before the most recent observation. */
+export interface Prior {
+  readonly standing?: Standing;
+  readonly confidence?: number | null;
+  readonly basis?: readonly unknown[];
+  readonly evaluated_at?: string;
+  readonly from?: string;
+  readonly n?: number;
+}
+
 export interface VerdictPayload {
   readonly counterparty: string;
   readonly standing: Standing;
@@ -32,6 +42,7 @@ export interface VerdictPayload {
   readonly no_basis: boolean;
   readonly evaluated_at: string;
   readonly sources_unavailable: readonly string[];
+  readonly prior: Prior | null;
 }
 
 export interface Attestation {
