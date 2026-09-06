@@ -9,7 +9,11 @@ eth-abi==6.0.0
 
 # Compiles packages/chain/contracts/FirsthandAttestations.sol. solc itself is
 # fetched on demand, so a clean clone needs no toolchain installed first.
-py-solc-x==2.0.4
+# 2.0.5 and no lower: 2.0.4 downloads from solc-bin.ethereum.org, which has been
+# retired and no longer resolves, so on that pin a clean install cannot fetch a
+# compiler at all. It passed locally only where an older resolution had left
+# 2.0.5 in place.
+py-solc-x==2.0.5
 
 # The read API. uvicorn serves it; httpx is what starlette's TestClient
 # drives the endpoints with in tests/test_api.py.
