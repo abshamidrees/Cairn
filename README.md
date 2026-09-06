@@ -5,10 +5,13 @@ another, it answers the only question that matters, *has this counterparty done 
 would before?*, and shows the observations the answer came from. Every verdict is arithmetic over
 a record Firsthand witnessed itself, never a rating somebody self-reported.
 
+[![ci](https://github.com/abshamidrees/Cairn/actions/workflows/ci.yml/badge.svg)](https://github.com/abshamidrees/Cairn/actions/workflows/ci.yml)
+
 [Run it locally](#run-it-locally) · [Methodology](#the-methodology-is-generated-from-the-engine) · [Where memory is load-bearing](#where-memory-is-load-bearing) · [What is real and what is not](#what-is-real-and-what-is-not)
 
-> Submission for the Sibyl Labs Memory Hackathon, Sep 1-10 2026. There is no hosted deployment and
-> no demo video yet; both are day 10. Everything below runs from a clean clone today.
+> Submission for the Sibyl Labs Memory Hackathon, Sep 1-10 2026. The web app is deployed; the read
+> API still runs locally, so the deployed site shows only the sections it can source. There is no
+> demo video yet. Everything below runs from a clean clone today.
 
 ---
 
@@ -21,7 +24,9 @@ a record Firsthand witnessed itself, never a rating somebody self-reported.
 | Identity registry read | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) |
 | Reputation registry read | [`0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`](https://basescan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
 | Indexed set | Base 8453, blocks 50,763,849 to 50,783,850 (20,002 blocks), 107 agents |
-| Attestation contract | Not deployed. Compiles and encodes; the deploy is one command and real ETH, see [what is real](#what-is-real-and-what-is-not) |
+| Attestation contract | [`0xaB4eB81cd12957Aa56744D02a3a842BEC5AAEE4B`](https://basescan.org/address/0xaB4eB81cd12957Aa56744D02a3a842BEC5AAEE4B) on Base 8453, deployed in [`0x5cd89c14`](https://basescan.org/tx/0x5cd89c1472461705480062892b5d0617d36e606f22b95159e06671b4decb8947) |
+| Published attestation | [`0x65407e03`](https://basescan.org/tx/0x65407e03b1ad643b2e208762757e4294e5aab66be1d82dacdeb01d300affd9b6): `grounded` on `0x01f90369...`, confidence 8300 bps, 3 observations, basis hash `a72393df...` |
+| Web app | <https://firsthand-iota.vercel.app> |
 | Public lookup API | Runs locally on port 8000. Free, no auth, no wallet connection to read |
 
 The lookup endpoint takes no key and returns the basis with the verdict:
@@ -92,10 +97,11 @@ Volunteering the limits is what makes the rest credible.
 | Reviewer weighting | **Real over the indexed set.** 13 of 14 claimants are below the corroboration threshold, so their weights are provisional and the API returns them flagged |
 | ACP agent and offering | **Real and live.** Registered on Base 8453 with a visible offering. **No job has been run**: that needs USDC in the agent wallet |
 | ACP Evaluator role | **Code complete and tested, never exercised.** [`observe/acp.py`](apps/agent/observe/acp.py), 13 tests against a fake CLI runner |
-| Base attestation write | **Not landed.** The contract compiles, the call encodes, and `--dry-run` prints exactly what would be sent. Deploying spends real ETH and has not been done |
+| Base attestation write | **Landed.** Contract [`0xaB4eB81c`](https://basescan.org/address/0xaB4eB81cd12957Aa56744D02a3a842BEC5AAEE4B), attestation [`0x65407e03`](https://basescan.org/tx/0x65407e03b1ad643b2e208762757e4294e5aab66be1d82dacdeb01d300affd9b6). The published fields match what `--dry-run` printed beforehand, and the event can be decoded from the chain to check it |
 | Indexed coverage | **Scoped, not truncated.** 20,002 blocks, not the full ERC-8004 set, because the free tier caps the database at 5,242,880 bytes. Stated here rather than hidden |
 | `suspect` standing | **Unreachable on current data, by design.** No agent in the indexed set has two conflicting owner records. Part 21 forbids accusing without a contradiction we can name, so the honest count is zero |
-| Hosted deployment, demo video, CI | **None yet.** No badge is shown for a check that does not exist |
+| CI | **Green.** ruff, mypy strict, the suite, then the deletion test against a fixture built at run time from synthetic addresses. The badge above links to the run |
+| Hosted API, demo video | **Neither yet.** The web app is deployed but reads an API that is still local, so the deployed landing page renders only what it can source |
 
 ---
 
