@@ -32,7 +32,7 @@ export default async function ExplorerPage() {
         <div className="mt-10 max-w-[40rem]">
           <ExplorerSearch />
           <p className="mt-3 font-mono text-[0.6875rem] text-slate">
-            Press ⌘K anywhere on the site. Prefix rv: to look up a claimant.
+            Press Ctrl+K, or Cmd+K on a Mac, anywhere on the site. Prefix rv: to look up a claimant.
           </p>
         </div>
 

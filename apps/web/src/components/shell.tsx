@@ -39,7 +39,9 @@ export function Nav({ standing = "default", observations = null }: NavProps) {
         </ul>
 
         <div className="flex items-center gap-4">
-          {/* Cmd+K anywhere on the site, because the nav is on every page. */}
+          {/* Mounted once, in the nav, which is on every page. A second copy
+              in the footer meant two keydown listeners and two stacked dialogs
+              answering one keystroke. */}
           <CommandPalette />
           {/* If the API is down this disappears rather than showing a zero,
               because a zero would be a claim Firsthand cannot support. */}
@@ -81,8 +83,6 @@ export function Footer({ ticker = [] }: { readonly ticker?: readonly TickerEntry
     <footer className="bg-basalt text-chalk">
       <div className="mx-auto flex max-w-[78rem] flex-col gap-12 px-6 py-16 md:flex-row md:justify-between">
         <div className="flex items-center gap-4">
-          {/* Cmd+K anywhere on the site, because the nav is on every page. */}
-          <CommandPalette />
           <FirsthandMark standing="grounded" width={48} height={48} />
           <span className="font-display text-[2.5rem] leading-none tracking-[-0.02em]">Firsthand</span>
         </div>

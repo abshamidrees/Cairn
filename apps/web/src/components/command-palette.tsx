@@ -68,18 +68,11 @@ export function CommandPalette() {
     window.location.href = destination;
   }, []);
 
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate hover:text-graphite"
-        aria-label="Search, or press Command K"
-      >
-        ⌘K
-      </button>
-    );
-  }
+  // Closed, this renders nothing. The keydown listener above is the whole
+  // affordance: the glyph it used to show was a Mac symbol printed to every
+  // platform, and the nav already carries a look-up button that does the same
+  // job in words.
+  if (!open) return null;
 
   const destination = destinationFor(query);
 
