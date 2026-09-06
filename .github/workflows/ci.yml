@@ -48,8 +48,9 @@ jobs:
           set -o pipefail
           pytest -q 2>&1 | tee pytest.log
 
-      # A failing run is read by whoever is not signed in, so what broke belongs
-      # on the summary rather than behind the log viewer.
+      # Logs and job summaries both need an account to read. Annotations do not,
+      # so the failure itself goes there and a red build says what broke to
+      # anyone looking, signed in or not.
       - name: What failed
         if: failure()
         run: |
@@ -58,8 +59,12 @@ jobs:
             echo '```'
             tail -n 120 pytest.log 2>/dev/null || echo 'no pytest output; an earlier step failed'
             echo '```'
-            echo "python: $(python --version)"
           } >> "$GITHUB_STEP_SUMMARY"
+          if [ -f pytest.log ]; then
+            body=$(grep -E "^(FAILED|ERROR|E  )" pytest.log | head -n 25 \
+              | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=pytest on $(python --version 2>&1)::${body:-see log}"
+          fi
 
       # The real database is gitignored, holds addresses indexed from Base, and
       # could not be rebuilt here anyway because CI has no Base RPC. The fixture
