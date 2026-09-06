@@ -39,7 +39,7 @@ curl -s localhost:8000/v1/observations/0x01f90369170c917a2c0e9d26d54c6a3a400984d
 - `GET /v1/dossier/{address}` returns the same observations arranged by tier, with the verdict and
   any attestation. It is what the explorer draws the Stack from.
 - `GET /v1/reviewer/{address}` returns a claimant's own dossier.
-- `GET /v1/stats` returns what Cairn currently holds across the whole indexed set.
-- `GET /v1/recent` returns the last few counterparties looked up, read from Cairn's own dossier
+- `GET /v1/stats` returns what Firsthand currently holds across the whole indexed set.
+- `GET /v1/recent` returns the last few counterparties looked up, read from Firsthand's own dossier
   rather than from a browser.
 - `GET /v1/health` returns the database path in use.

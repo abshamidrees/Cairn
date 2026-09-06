@@ -24,9 +24,12 @@ docs/PLAYBOOK.md
 docs/SUBMISSION.md
 docs/RULES.md
 docs/_*.md
-# Duplicate copies of the brief that would otherwise slip past the rules above.
-CAIRN-BRIEF*.md
-docs/CAIRN-BRIEF*.md
+# Any copy of the build brief, under any name it arrives with.
+*BRIEF*.md
+docs/FINISH.md
+# The brand delivery folder. Its contents are copied into brand/, which is
+# tracked; keeping both would mean two sources for one asset.
+firsthand-brand/
 brand/LOGO-PROMPTS.md
 private/
 notes/

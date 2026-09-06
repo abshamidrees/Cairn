@@ -11,15 +11,15 @@ import "@/styles/tokens.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(canonicalFor("landing")),
-  title: { default: "Cairn", template: "%s · Cairn" },
+  title: { default: "Firsthand", template: "%s · Firsthand" },
   description:
-    "Cairn is a memory-native trust layer for agent commerce. Every verdict points at the observations it came from.",
+    "Firsthand is a memory-native trust layer for agent commerce. Every verdict points at the observations it came from.",
   alternates: { canonical: canonicalFor("landing") },
   openGraph: {
-    title: "Cairn",
+    title: "Firsthand",
     description: "A record, not a rating.",
     url: canonicalFor("landing"),
-    siteName: "Cairn",
+    siteName: "Firsthand",
     type: "website",
   },
 };

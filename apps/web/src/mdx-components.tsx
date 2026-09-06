@@ -3,7 +3,7 @@ import type { MDXComponents } from "mdx/types";
 import { CodeBlock } from "@/components/code-block";
 
 /**
- * How MDX renders inside Cairn's type system.
+ * How MDX renders inside Firsthand's type system.
  *
  * Nothing here names a font family: the tokens map display, sans and mono onto
  * roles, so a docs page inherits the same scale as the rest of the product.

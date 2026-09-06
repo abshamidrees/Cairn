@@ -1,9 +1,9 @@
-# Cairn
+# Firsthand
 
-**Cairn is a memory-native trust layer for agent commerce.** When one agent is about to pay
+**Firsthand is a memory-native trust layer for agent commerce.** When one agent is about to pay
 another, it answers the only question that matters, *has this counterparty done what it said it
 would before?*, and shows the observations the answer came from. Every verdict is arithmetic over
-a record Cairn witnessed itself, never a rating somebody self-reported.
+a record Firsthand witnessed itself, never a rating somebody self-reported.
 
 [Run it locally](#run-it-locally) · [Methodology](#the-methodology-is-generated-from-the-engine) · [Where memory is load-bearing](#where-memory-is-load-bearing) · [What is real and what is not](#what-is-real-and-what-is-not)
 
@@ -16,7 +16,7 @@ a record Cairn witnessed itself, never a rating somebody self-reported.
 
 | What | Where |
 |---|---|
-| ACP agent | `Cairn`, wallet [`0x484eeb2aa5e97c374375018b08581d62c7769e0a`](https://basescan.org/address/0x484eeb2aa5e97c374375018b08581d62c7769e0a) on Base 8453, agent id `01a06098-ef45-7e55-8ad6-21970291edb3` |
+| ACP agent | `Firsthand`, wallet [`0x484eeb2aa5e97c374375018b08581d62c7769e0a`](https://basescan.org/address/0x484eeb2aa5e97c374375018b08581d62c7769e0a) on Base 8453, agent id `01a06098-ef45-7e55-8ad6-21970291edb3` |
 | ACP offering | `Counterparty dossier`, `01a060b1-cb39-77b7-8024-f511e2c31b1e`, 0.01 USDC, 10 minute SLA, visible |
 | Identity registry read | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) |
 | Reputation registry read | [`0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`](https://basescan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
@@ -52,12 +52,12 @@ the two.
 | `forward` as the session baton, drained on boot | [`store.py:551`](apps/agent/memory/store.py#L551) `drain_forward()` |
 | Reads, the verdict pulls prior and evidence back out | [`judge/verdict.py:446`](apps/agent/judge/verdict.py#L446) `evaluate()` |
 | Reviewer weighting, the layer ERC-8004 says is missing | [`verdict.py:225`](apps/agent/judge/verdict.py#L225) `reviewer_weight()` |
-| Cairn with its memory removed | [`store.py:577`](apps/agent/memory/store.py#L577) `NullStore` |
+| Firsthand with its memory removed | [`store.py:577`](apps/agent/memory/store.py#L577) `NullStore` |
 | Proof it is load-bearing | [`scripts/deletion_test.py`](scripts/deletion_test.py) |
 
 ### The deletion test
 
-The hackathon's gate is: remove the memory layer, does it still do what it claims? Cairn ships the
+The hackathon's gate is: remove the memory layer, does it still do what it claims? Firsthand ships the
 tool that answers it.
 
 ```bash
@@ -71,7 +71,7 @@ Real output against the indexed set:
   memory OFF     standing=thin      confidence=-     basis=0  observations
                  ↳ verdict engine returned NO_BASIS
 
-  Cairn's core function is unavailable without the memory layer.  PASS
+  Firsthand's core function is unavailable without the memory layer.  PASS
 ```
 
 It exits non-zero if the memory-off run ever produces a usable verdict. The swap is one line at the
@@ -101,7 +101,7 @@ Volunteering the limits is what makes the rest credible.
 
 ## The public scan
 
-An aggregate finding about how the ERC-8004 reputation layer is used, computed from what Cairn
+An aggregate finding about how the ERC-8004 reputation layer is used, computed from what Firsthand
 witnessed and checkable against the same chain data. It runs at `/scan`, with the raw numbers at
 `/scan.json`, and regenerates with:
 
@@ -121,13 +121,13 @@ invented one is worth less than none.
 
 ## Documentation
 
-`/docs`, eighteen pages: what Cairn is, quickstart, the concepts, the memory architecture, the API
+`/docs`, eighteen pages: what Firsthand is, quickstart, the concepts, the memory architecture, the API
 read out of `apps/agent/api` rather than imagined, and the two partner stacks. The webhooks page
 exists to say there are none, because omitting it would imply one.
 
 ## What the indexed set actually shows
 
-Cairn read 20,002 blocks of the ERC-8004 registries on Base and judged every counterparty it found.
+Firsthand read 20,002 blocks of the ERC-8004 registries on Base and judged every counterparty it found.
 
 | | |
 |---|---|
@@ -140,10 +140,10 @@ Cairn read 20,002 blocks of the ERC-8004 registries on Base and judged every cou
 
 **One counterparty in seventy has enough independent corroboration to be grounded.** The busiest
 dossier in the set holds 100 pieces of feedback from a single claimant, all about the same agent,
-all tagged the same way. Cairn reads it as `thin`, because a hundred repetitions by one party is
+all tagged the same way. Firsthand reads it as `thin`, because a hundred repetitions by one party is
 not corroboration.
 
-This is a finding about the registry's design, not a list of bad actors. Cairn cannot support the
+This is a finding about the registry's design, not a list of bad actors. Firsthand cannot support the
 claim that any individual agent behaved badly, and does not make it. What it can support is that a
 reputation layer where one party can speak a hundred times and move a score is one where the score
 does not mean what a reader assumes.
@@ -152,7 +152,7 @@ does not mean what a reader assumes.
 
 ## How memory made this possible
 
-Cairn is not a product that uses memory. It is a product made of memory.
+Firsthand is not a product that uses memory. It is a product made of memory.
 
 The thing being sold is an accumulated, grounded record of what agents have actually done. Strip the
 record and there is no product, not a degraded one. A stateless model asked "should I pay `0x...`?"
@@ -160,16 +160,16 @@ can only guess, because the answer lives entirely in what was observed before th
 
 **Tenancy is the coordination pattern.** `set_tenant()` gives every counterparty and every claimant
 a fully isolated dossier inside one database file. A single verdict reads three tenants, the
-counterparty's, each claimant's, and Cairn's own, and writes back to two. Memory is the substrate
+counterparty's, each claimant's, and Firsthand's own, and writes back to two. Memory is the substrate
 three parties coordinate through, not a cache in front of something else.
 
 **The tier is a decision, revised over time.** An observation seen once stays in the COLD journal.
-Seen three times inside the window, Cairn promotes it to a WARM entity and journals the promotion
+Seen three times inside the window, Firsthand promotes it to a WARM entity and journals the promotion
 itself, so the migration is part of the record. When the evidence ages out the entity is archived
 with a reason. Where a fact lives is information.
 
 **`forward` is the session baton.** `write_event(evaluated=..., acted=..., forward=...)` carries what
-the next session must pick up. Cairn's first act on boot is to drain it. Handing the same work
+the next session must pick up. Firsthand's first act on boot is to drain it. Handing the same work
 forward on every sweep would grow an append-only journal without bound, so the baton carries news:
 an unchanged verdict hands nothing.
 
@@ -184,7 +184,7 @@ one operational decision.
 
 | Stack | What it does here | Where |
 |---|---|---|
-| **Base** | Reads the ERC-8004 Identity and Reputation registries on 8453; publishes a verdict as an attestation | [`observe/base.py`](apps/agent/observe/base.py), [`publish/attest.py`](apps/agent/publish/attest.py), [`CairnAttestations.sol`](packages/chain/contracts/CairnAttestations.sol) |
+| **Base** | Reads the ERC-8004 Identity and Reputation registries on 8453; publishes a verdict as an attestation | [`observe/base.py`](apps/agent/observe/base.py), [`publish/attest.py`](apps/agent/publish/attest.py), [`FirsthandAttestations.sol`](packages/chain/contracts/FirsthandAttestations.sol) |
 | **Virtuals ACP** | Registered agent with a live offering, taking the neutral Evaluator role, driven by subprocess with `--json` | [`observe/acp.py`](apps/agent/observe/acp.py) |
 
 Neither is decorative. Without Base there is nothing to observe; without ACP there is no evaluator
@@ -197,7 +197,7 @@ role to occupy.
 **Confidence counted volume, and volume was purchasable.** The first formula followed the spec
 literally and scored the busiest dossier at 0.65. Almost all of it came from raw observation count,
 the one quantity on this chain that costs a median of $0.0027 to manufacture. The formula was paying
-for exactly the behaviour Cairn exists to catch. Volume now counts distinct sources, saturating at
+for exactly the behaviour Firsthand exists to catch. Volume now counts distinct sources, saturating at
 five, and the same dossier scores 0.33. Any term in a trust score has to be priced by what it costs
 an adversary to fake, not by how easy it is to count.
 
@@ -245,7 +245,7 @@ confidence  clamp(0.40 * min(distinct_sources / 5, 1)
                 - 0.25 * contradictions)
 ```
 
-`confidence: null` means there was no record. A confidence of `0.0` means Cairn looked and found the
+`confidence: null` means there was no record. A confidence of `0.0` means Firsthand looked and found the
 record worthless. The two never render the same.
 
 ---
@@ -253,7 +253,7 @@ record worthless. The two never render the same.
 ## Project layout
 
 ```
-apps/agent/       Python. Cairn core, and the load-bearing code.
+apps/agent/       Python. Firsthand core, and the load-bearing code.
   memory/store.py   The only module that imports sibyl_memory_client
   observe/base.py   ERC-8004 registry reads on Base
   observe/acp.py    Virtuals ACP, provider and Evaluator
@@ -261,7 +261,7 @@ apps/agent/       Python. Cairn core, and the load-bearing code.
   publish/attest.py Attestation encoding and publishing
   api/main.py       FastAPI, read-only, with ?memory=off
 apps/web/         Next.js 15. Landing page and explorer
-packages/chain/   CairnAttestations.sol
+packages/chain/   FirsthandAttestations.sol
 scripts/          deletion_test, summarise, acp_job, publish_attestation
 tests/            113 tests
 ```
@@ -308,19 +308,19 @@ mypy
 
 ## Vocabulary
 
-- **observation**: one event Cairn watched happen and hashed
+- **observation**: one event Firsthand watched happen and hashed
 - **dossier**: the accumulated record for one counterparty, in its own memory tenant
-- **grounding**: tying a claim to an observation Cairn holds
-- **verdict**: Cairn's current judgment, carrying a **confidence** and a **basis**
-- **prior**: what Cairn believed before the latest observation
+- **grounding**: tying a claim to an observation Firsthand holds
+- **verdict**: Firsthand's current judgment, carrying a **confidence** and a **basis**
+- **prior**: what Firsthand believed before the latest observation
 - **standing**: `grounded` · `thin` · `suspect` · `dormant`
 
 We never say *reputation score*, *rating*, *review* or *trust score*. Those are the broken things
-Cairn replaces.
+Firsthand replaces.
 
 ## Fair judgment
 
-Cairn publishes judgments about real, named third parties. Four rules are enforced in code, not
+Firsthand publishes judgments about real, named third parties. Four rules are enforced in code, not
 policy. Absence is never evidence: a source that was not ingested makes its checks skip rather than
 count against anyone. `suspect` requires a contradiction the engine can name, and reaching it with
 an empty basis raises rather than downgrading quietly. The language stays neutral everywhere, in the

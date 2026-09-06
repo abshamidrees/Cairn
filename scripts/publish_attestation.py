@@ -6,11 +6,11 @@ rather than a side effect of asking a question.
     python scripts/publish_attestation.py --deploy
     python scripts/publish_attestation.py --agent 0x... --contract 0x...
 
-Needs CAIRN_ATTESTOR_KEY in the environment: a key that holds a few dollars of
+Needs FIRSTHAND_ATTESTOR_KEY in the environment: a key that holds a few dollars of
 ETH on Base and nothing else. It is read, never printed, never written anywhere.
 
 The published transaction hash is recorded in the counterparty's own dossier, so
-the explorer shows what Cairn said about an agent next to the observations it
+the explorer shows what Firsthand said about an agent next to the observations it
 said it from.
 """
 
@@ -61,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.contract:
-        os.environ["CAIRN_ATTESTATION_CONTRACT"] = args.contract
+        os.environ["FIRSTHAND_ATTESTATION_CONTRACT"] = args.contract
 
     try:
         attestor = attestor_from_env()
@@ -75,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
         tx_hash, address = attestor.deploy()
         print(f"  deployed       {address}")
         print(f"  transaction    https://basescan.org/tx/0x{tx_hash.removeprefix('0x')}")
-        print("  Put that address in CAIRN_ATTESTATION_CONTRACT.")
+        print("  Put that address in FIRSTHAND_ATTESTATION_CONTRACT.")
         return 0
 
     if not args.agent:

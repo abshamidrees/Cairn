@@ -5,7 +5,7 @@ Everything here goes through `@virtuals-protocol/acp-cli` by subprocess with
 agent's signer, and reimplementing its escrow calls would mean maintaining a
 parallel understanding of a protocol we do not control.
 
-Cairn occupies two roles on one job.
+Firsthand occupies two roles on one job.
 
 As **provider** it sells `Counterparty dossier`: the requirement is a
 counterparty address, and the deliverable is the dossier JSON that
@@ -13,7 +13,7 @@ counterparty address, and the deliverable is the dossier JSON that
 
 As **Evaluator** it decides whether a deliverable is acceptable. That decision is
 the same arithmetic the rest of the product uses, never a model call and never a
-rubber stamp: a deliverable is accepted when it carries a basis Cairn can match
+rubber stamp: a deliverable is accepted when it carries a basis Firsthand can match
 against its own record, and rejected with a reason naming what was missing.
 """
 
@@ -63,7 +63,7 @@ def _subprocess_runner(args: Sequence[str]) -> str:
 
 @dataclass(frozen=True)
 class Deliverable:
-    """What Cairn hands back when it sells a dossier."""
+    """What Firsthand hands back when it sells a dossier."""
 
     counterparty: str
     standing: str
@@ -189,18 +189,18 @@ class Acp:
         return found if isinstance(found, dict) else {}
 
 
-# ---- what Cairn sells, and how it judges what it is sold -----------------
+# ---- what Firsthand sells, and how it judges what it is sold -----------------
 
 
 def build_deliverable(store: Store, address: str, *, chain: str = "base") -> Deliverable:
-    """Produce the dossier a buyer paid for, from the record Cairn holds."""
+    """Produce the dossier a buyer paid for, from the record Firsthand holds."""
     verdict = evaluate(store, chain, address, write=False)
     return Deliverable(
         counterparty=verdict.counterparty,
         standing=verdict.standing,
         confidence=verdict.confidence,
         basis=tuple(item.observation_id for item in verdict.basis),
-        methodology="https://docs.usecairn.xyz/methodology",
+        methodology="https://docs.usefirsthand.xyz/methodology",
     )
 
 
@@ -211,14 +211,14 @@ def evaluate_deliverable(payload: object) -> Decision:
     on tone is worse. This checks the only thing that can be checked: whether
     the answer carries a basis, and whether its confidence is consistent with
     having one. A verdict claiming confidence with no observations behind it is
-    the exact failure Cairn exists to catch, so it is refused.
+    the exact failure Firsthand exists to catch, so it is refused.
     """
     if not isinstance(payload, dict):
         return Decision(False, "the deliverable was not a dossier")
 
     standing = payload.get("standing")
     if standing not in ("grounded", "thin", "suspect", "dormant"):
-        return Decision(False, f"standing {standing!r} is not one Cairn recognises")
+        return Decision(False, f"standing {standing!r} is not one Firsthand recognises")
 
     basis = payload.get("basis")
     basis_list = basis if isinstance(basis, list) else []

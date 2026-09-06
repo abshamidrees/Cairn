@@ -7,7 +7,7 @@ import { apiBase } from "@/lib/api";
 /**
  * Cmd+K anywhere on the site.
  *
- * Recent lookups come from `/v1/recent`, which reads them out of Cairn's own
+ * Recent lookups come from `/v1/recent`, which reads them out of Firsthand's own
  * dossier rather than localStorage. Part 8 asks for them to be persisted in
  * memory, and this is the one place where following that literally also makes
  * the demo better: the list survives a different browser, because it was never
@@ -114,12 +114,12 @@ export function CommandPalette() {
         <div className="border-t border-seam px-5 py-3">
           {query.trim() && !destination ? (
             <p className="font-mono text-[0.6875rem] text-slate">
-              Not an address Cairn can look up. Paste a 0x address, or prefix rv: for a claimant.
+              Not an address Firsthand can look up. Paste a 0x address, or prefix rv: for a claimant.
             </p>
           ) : recent.length > 0 ? (
             <>
               <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
-                recent, from Cairn&rsquo;s own record
+                recent, from Firsthand&rsquo;s own record
               </p>
               <ul className="mt-2 space-y-1">
                 {recent.map((tenant) => {

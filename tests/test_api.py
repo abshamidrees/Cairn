@@ -150,7 +150,7 @@ def test_memory_off_empties_the_claimant_view_too(client: TestClient) -> None:
 # ---- recent lookups, kept in memory rather than a browser ----------------
 
 
-def test_a_lookup_is_remembered_in_cairns_own_dossier(client: TestClient) -> None:
+def test_a_lookup_is_remembered_in_firsthands_own_dossier(client: TestClient) -> None:
     """Part 8 asks for recent lookups in memory, not localStorage."""
     assert client.get("/v1/recent").json()["recent"] == []
 

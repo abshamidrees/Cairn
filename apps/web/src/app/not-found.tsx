@@ -9,7 +9,7 @@ export default function NotFound() {
       <main className="mx-auto max-w-[78rem] px-6 py-20">
         <p className="eyebrow">Nothing here</p>
         <h1 className="mt-3 max-w-[20ch] text-[length:var(--text-section)] leading-[var(--text-section-lead)] tracking-[var(--text-section-track)]">
-          Cairn has no page at this address.
+          Firsthand has no page at this address.
         </h1>
         <p className="mt-6 max-w-[36rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
           This is a missing route, not a judgment about a counterparty. If you were looking up

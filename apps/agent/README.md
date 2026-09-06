@@ -1,6 +1,6 @@
 # apps/agent
 
-Python. Cairn's core, and the load-bearing code for the hackathon's memory
+Python. Firsthand's core, and the load-bearing code for the hackathon's memory
 criterion. Runs as one process on one machine with a real disk, because
 Sibyl Memory is a local SQLite file that never leaves the box.
 

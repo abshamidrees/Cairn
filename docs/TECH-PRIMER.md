@@ -1,4 +1,4 @@
-# Cairn, explained plainly
+# Firsthand, explained plainly
 
 This is the "what actually happens" document. No jargon that isn't defined. Read it before you run the first Claude Code prompt so you can tell when something is going wrong.
 
@@ -10,27 +10,27 @@ AI agents are starting to pay each other. On Virtuals ACP, one agent hires anoth
 
 So the scores exist, and they mean nothing.
 
-## 2. What Cairn does about it
+## 2. What Firsthand does about it
 
-Cairn refuses to accept anyone's word for anything. It only records things it watched happen.
+Firsthand refuses to accept anyone's word for anything. It only records things it watched happen.
 
 That's the entire idea. Everything else is plumbing.
 
-When an ACP job completes, Cairn saw it complete. When an escrow gets rejected, Cairn saw the rejection. When a delivery hash doesn't match what was promised, Cairn computed both hashes itself. Each of those is an **observation**: a single event, with a timestamp, a source link, and a content hash.
+When an ACP job completes, Firsthand saw it complete. When an escrow gets rejected, Firsthand saw the rejection. When a delivery hash doesn't match what was promised, Firsthand computed both hashes itself. Each of those is an **observation**: a single event, with a timestamp, a source link, and a content hash.
 
-Cairn stores every observation. Over weeks it accumulates a **dossier** on each agent: not a score, a pile of things that happened. When you ask "should I pay `0xabc...`?", Cairn doesn't return a number from a database. It runs the arithmetic over that pile and returns three things:
+Firsthand stores every observation. Over weeks it accumulates a **dossier** on each agent: not a score, a pile of things that happened. When you ask "should I pay `0xabc...`?", Firsthand doesn't return a number from a database. It runs the arithmetic over that pile and returns three things:
 
 - a **standing**: `grounded`, `thin`, `suspect`, or `dormant`
 - a **confidence**: how sure it is, given how much it has seen and how recently
 - a **basis**: the actual list of observations the answer rests on, each one clickable
 
-The basis is the product. Anyone can give you a number. Cairn shows its work.
+The basis is the product. Anyone can give you a number. Firsthand shows its work.
 
 ## 3. Why memory isn't a feature here
 
 This is the part that has to be crystal clear, because 40 of the 110 available points ride on it.
 
-Cairn has no model to fall back on. There is no "estimate" it can produce from first principles. The answer to "has this agent behaved well before?" lives *entirely* in what was previously observed and written down. Delete the stored observations and the question becomes unanswerable, not harder, unanswerable.
+Firsthand has no model to fall back on. There is no "estimate" it can produce from first principles. The answer to "has this agent behaved well before?" lives *entirely* in what was previously observed and written down. Delete the stored observations and the question becomes unanswerable, not harder, unanswerable.
 
 Compare that to a typical hackathon entry: "a chatbot that remembers your preferences." Delete its memory and it's still a chatbot. It's worse, but it works. That's a wrapper, and the rules say wrappers are disqualified before scoring even starts.
 
@@ -40,7 +40,7 @@ Compare that to a typical hackathon entry: "a chatbot that remembers your prefer
 
 Sibyl Memory isn't a key-value store. It has five tiers, each with its own API, and choosing the right one is a real decision. This is the part the rubric calls "dynamic-storage patterns," and it's where the top of the band is.
 
-| Tier | Sibyl API | What Cairn puts there |
+| Tier | Sibyl API | What Firsthand puts there |
 |---|---|---|
 | **HOT** · state | `set_state` / `get_state` | The live verdict for a counterparty being evaluated right now. Rewritten in place, always current |
 | **WARM** · entities | `set_entity` / `get_entity` | Durable facts, an agent's identity, its declared services, any behaviour seen three or more times |
@@ -50,7 +50,7 @@ Sibyl Memory isn't a key-value store. It has five tiers, each with its own API, 
 
 Three movements between those tiers are what make this sophisticated rather than tidy:
 
-**Promotion.** You see an agent deliver late once, that's noise, it stays in the journal. You see it three times, that's a pattern, and Cairn promotes it to a WARM entity with a `first_seen`, a `last_seen` and a count. It also writes a journal event recording that the promotion happened, so the decision itself is auditable.
+**Promotion.** You see an agent deliver late once, that's noise, it stays in the journal. You see it three times, that's a pattern, and Firsthand promotes it to a WARM entity with a `first_seen`, a `last_seen` and a count. It also writes a journal event recording that the promotion happened, so the decision itself is auditable.
 
 **Demotion.** An entity whose supporting observations have all aged past the decay window gets archived with `reason="evidence aged out"`. Not deleted, archived, because "we used to believe this and here's why we stopped" is information.
 
@@ -60,11 +60,11 @@ Three movements between those tiers are what make this sophisticated rather than
 
 `MemoryClient.set_tenant(id)` switches which isolated slice of the database you're reading and writing. Everything is scoped by `tenant_id`; one tenant physically cannot see another's rows. I verified this works.
 
-Cairn uses three kinds of tenant:
+Firsthand uses three kinds of tenant:
 
 - `cp:base:0xabc...`: one per counterparty
 - `rv:0xdef...`: one per reviewer
-- `cairn:self`: Cairn's own operating state and calibration
+- `cairn:self`: Firsthand's own operating state and calibration
 
 Now here's the interesting part. Producing one verdict about counterparty A means:
 
@@ -80,9 +80,9 @@ Three separate memory identities coordinate to produce one answer, and the answe
 
 The ERC-8004 spec admits its own reputation numbers are only meaningful if some *other* system scores the reviewers, and then says, in effect, that system doesn't exist yet.
 
-Cairn is that system, and it can only exist because of memory.
+Firsthand is that system, and it can only exist because of memory.
 
-The logic is simple to state and impossible without history: a reviewer who rated twelve agents highly, three of which Cairn later watched fail, is a reviewer whose future claims count for less. You cannot compute that in one session. You need the original claim from months ago, the outcome from last week, and a link between them. That link is what Cairn stores.
+The logic is simple to state and impossible without history: a reviewer who rated twelve agents highly, three of which Firsthand later watched fail, is a reviewer whose future claims count for less. You cannot compute that in one session. You need the original claim from months ago, the outcome from last week, and a link between them. That link is what Firsthand stores.
 
 ## 7. The verdict engine is arithmetic, not a prompt
 

@@ -25,7 +25,7 @@ export interface Stone {
   readonly detail: Readonly<Record<string, unknown>>;
 }
 
-/** What Cairn believed before the most recent observation. */
+/** What Firsthand believed before the most recent observation. */
 export interface Prior {
   readonly standing?: Standing;
   readonly confidence?: number | null;

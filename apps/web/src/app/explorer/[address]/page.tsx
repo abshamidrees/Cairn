@@ -14,7 +14,7 @@ import { apiBase, type Dossier } from "@/lib/api";
  * them, which is the screen that shows memory doing work rather than asserting
  * that it does.
  *
- * There is no 404 here. An address Cairn has never seen is a real answer, and a
+ * There is no 404 here. An address Firsthand has never seen is a real answer, and a
  * malformed one is a mistake worth explaining rather than a dead end.
  */
 
@@ -57,10 +57,10 @@ export default async function DossierPage({
       <Frame address={address}>
         <div className="mt-8 rounded-stone border border-seam bg-paper p-8">
           <p className="font-display text-[1.5rem] text-graphite">
-            That is not an address Cairn can look up.
+            That is not an address Firsthand can look up.
           </p>
           <p className="mt-2 max-w-[36rem] text-slate">
-            A counterparty is a 40 character address beginning 0x. Cairn has not judged this
+            A counterparty is a 40 character address beginning 0x. Firsthand has not judged this
             one either way, because it cannot tell what it refers to.
           </p>
           <a
@@ -84,7 +84,7 @@ export default async function DossierPage({
             could not read the record
           </p>
           <p className="mt-3 font-display text-[1.5rem] text-graphite">
-            Cairn could not reach its own memory.
+            Firsthand could not reach its own memory.
           </p>
           <p className="mt-2 max-w-[36rem] text-slate">
             This is a failure to answer, not an answer. Nothing on this screen should be read
@@ -108,12 +108,12 @@ export default async function DossierPage({
           {dossier.verdict.no_basis
             ? "no basis"
             : dossier.verdict.standing === "grounded"
-              ? "Cairn has watched this counterparty do what it said it would."
+              ? "Firsthand has watched this counterparty do what it said it would."
               : dossier.verdict.standing === "suspect"
-                ? "Cairn's own record contradicts a claim about this counterparty."
+                ? "Firsthand's own record contradicts a claim about this counterparty."
                 : dossier.verdict.standing === "dormant"
-                  ? "Cairn has not witnessed this counterparty in some time."
-                  : "Cairn has too little to go on."}
+                  ? "Firsthand has not witnessed this counterparty in some time."
+                  : "Firsthand has too little to go on."}
         </span>
         <span className="font-mono text-[0.8125rem] tabular-nums text-slate">
           {dossier.verdict.confidence === null
@@ -130,18 +130,18 @@ export default async function DossierPage({
       {dossier.counts.observations === 0 ? (
         <div className="mt-10 rounded-stone border border-seam bg-paper p-8">
           <p className="font-display text-[1.5rem] text-graphite">
-            No observations. Cairn has never watched this agent do anything.
+            No observations. Firsthand has never watched this agent do anything.
           </p>
           <p className="mt-2 max-w-[40rem] text-slate">
             That is not the same as having watched it do something wrong. Once this
             counterparty settles an escrow, is registered, or is written about by someone
-            Cairn indexes, the event lands in the journal below and a verdict follows from it.
+            Firsthand indexes, the event lands in the journal below and a verdict follows from it.
           </p>
           <a
             href="/docs"
             className="mt-5 inline-block rounded-pill bg-lapis px-5 py-2 font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-chalk hover:bg-lapis-ink"
           >
-            How Cairn starts watching
+            How Firsthand starts watching
           </a>
         </div>
       ) : (
@@ -159,7 +159,7 @@ export default async function DossierPage({
         <p className="eyebrow">Published on Base</p>
         {dossier.attestation === null ? (
           <p className="mt-4 max-w-[46rem] text-slate">
-            This verdict has not been published on chain. Cairn attests a verdict only when it
+            This verdict has not been published on chain. Firsthand attests a verdict only when it
             carries a basis, so nothing is written for a counterparty it has nothing on.
           </p>
         ) : (

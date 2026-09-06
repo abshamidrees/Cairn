@@ -5,7 +5,7 @@
  * the live indexed set does not currently contain, such as a suspect standing.
  * Nothing here is ever rendered on a product surface, and none of it is a
  * measurement: no counts, percentages or figures from this file appear anywhere
- * a reader could mistake them for something Cairn witnessed.
+ * a reader could mistake them for something Firsthand witnessed.
  */
 
 import { TIERS, tiltFor, type Stone, type Tier } from "@/lib/api";

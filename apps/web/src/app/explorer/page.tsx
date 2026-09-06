@@ -38,11 +38,11 @@ export default async function ExplorerPage() {
 
         <section className="mt-14">
           <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
-            recent, from Cairn&rsquo;s own record
+            recent, from Firsthand&rsquo;s own record
           </p>
           {recent.length === 0 ? (
             <p className="mt-3 max-w-[40rem] text-slate">
-              Nothing looked up yet. Recent lookups are kept in Cairn&rsquo;s own dossier
+              Nothing looked up yet. Recent lookups are kept in Firsthand&rsquo;s own dossier
               rather than in this browser, so the first search will appear here and on any
               other machine.
             </p>

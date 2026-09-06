@@ -14,7 +14,7 @@ export const DOCS: readonly DocGroup[] = [
   {
     label: "Start",
     pages: [
-      { title: "What Cairn is", href: "/docs" },
+      { title: "What Firsthand is", href: "/docs" },
       { title: "Quickstart", href: "/docs/quickstart" },
       { title: "Ask about a counterparty", href: "/docs/ask" },
     ],
@@ -34,7 +34,7 @@ export const DOCS: readonly DocGroup[] = [
     label: "Memory",
     pages: [
       { title: "The five tiers", href: "/docs/memory/tiers" },
-      { title: "How Cairn promotes and decays", href: "/docs/memory/promotion" },
+      { title: "How Firsthand promotes and decays", href: "/docs/memory/promotion" },
       { title: "The deletion test", href: "/docs/memory/deletion-test" },
     ],
   },

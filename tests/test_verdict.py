@@ -2,7 +2,7 @@
 
 One test per standing transition, the confidence formula pinned to arithmetic
 rather than to whatever the code happens to return, and the part 21 guards that
-stop Cairn accusing a real agent it cannot point at.
+stop Firsthand accusing a real agent it cannot point at.
 """
 
 from __future__ import annotations
@@ -169,7 +169,7 @@ def test_a_contradiction_outranks_staleness(store: MemoryStore) -> None:
 def test_an_unfetched_registration_file_never_creates_suspicion(store: MemoryStore) -> None:
     """Absence is never evidence.
 
-    A registration file Cairn could not fetch marks the source unavailable. It
+    A registration file Firsthand could not fetch marks the source unavailable. It
     does not become a claim, and it cannot make anybody suspect.
     """
     seed(store, registration("0xowner1111111111111111111111111111111111", available=False))
@@ -204,7 +204,7 @@ def test_a_contradiction_without_ids_raises_rather_than_downgrading(
 
     A contradiction that cannot name an observation is a bug in the engine, and
     the engine must refuse rather than quietly returning a softer standing. If
-    this ever downgrades to `thin` instead of raising, Cairn has started hiding
+    this ever downgrades to `thin` instead of raising, Firsthand has started hiding
     its own defects behind a gentler verdict.
     """
     from apps.agent.judge import verdict as engine
@@ -305,7 +305,7 @@ def test_repeating_yourself_buys_no_confidence() -> None:
 
     With the number of sources fixed at one, adding observations must change
     nothing at all. If confidence rises with raw count then a claimant can buy
-    it for $0.0027 a time, which is the finding Cairn exists to answer.
+    it for $0.0027 a time, which is the finding Firsthand exists to answer.
     """
     few = confidence_for(
         n_observations=2, distinct_sources=1, corroborated=0, recency=1.0, contradictions=0

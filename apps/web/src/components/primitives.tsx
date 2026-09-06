@@ -48,7 +48,7 @@ export function StandingChip({ standing }: { standing: Standing }) {
 
 /* ---- VerdictLine ------------------------------------------------------- */
 
-/** The only italic in the product, so italic means "this is Cairn's judgment". */
+/** The only italic in the product, so italic means "this is Firsthand's judgment". */
 export function VerdictLine({
   standing,
   confidence,
@@ -61,12 +61,12 @@ export function VerdictLine({
   const sentence = noBasis
     ? "no basis"
     : standing === "grounded"
-      ? "Cairn has watched this counterparty do what it said it would."
+      ? "Firsthand has watched this counterparty do what it said it would."
       : standing === "suspect"
-        ? "Cairn's own record contradicts a claim about this counterparty."
+        ? "Firsthand's own record contradicts a claim about this counterparty."
         : standing === "dormant"
-          ? "Cairn has not witnessed this counterparty in some time."
-          : "Cairn has too little to go on.";
+          ? "Firsthand has not witnessed this counterparty in some time."
+          : "Firsthand has too little to go on.";
 
   return (
     <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

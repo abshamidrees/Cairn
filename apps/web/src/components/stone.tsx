@@ -79,7 +79,7 @@ export function Stone({
 
 /**
  * What a stone is, shown when one is hovered or focused. Every field here is
- * something Cairn witnessed and can point at, including the hash of the raw
+ * something Firsthand witnessed and can point at, including the hash of the raw
  * evidence, so the card is the grounding made legible.
  */
 export function ObservationCard({ stone }: { readonly stone: StoneData | null }) {
@@ -90,7 +90,7 @@ export function ObservationCard({ stone }: { readonly stone: StoneData | null })
           select a stone
         </p>
         <p className="mt-2 text-[0.8125rem] text-scree">
-          Every stone is one observation. Focus one to see what Cairn witnessed.
+          Every stone is one observation. Focus one to see what Firsthand witnessed.
         </p>
       </div>
     );

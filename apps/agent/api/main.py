@@ -1,4 +1,4 @@
-"""Cairn's read API, mounted on the same machine as memory.db.
+"""Firsthand's read API, mounted on the same machine as memory.db.
 
 One rule shapes this module: `?memory=off` genuinely bypasses the memory layer.
 It swaps `MemoryStore` for `NullStore` before the request reaches the engine, so
@@ -42,16 +42,16 @@ TIERS = ("ARCHIVE", "REFERENCE", "COLD", "WARM", "HOT")
 Grounding = Literal["grounded", "thin", "suspect", "dormant"]
 
 app = FastAPI(
-    title="Cairn",
+    title="Firsthand",
     summary="A record, not a rating.",
     version="0.1.0",
 )
 
 # The web app is served from a different origin in development and from the
-# usecairn.xyz subdomains in production.
+# usefirsthand.xyz subdomains in production.
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?|https://([a-z]+\.)?usecairn\.xyz",
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?|https://([a-z]+\.)?usefirsthand\.xyz",
     allow_methods=["GET"],
     allow_headers=["*"],
 )
@@ -209,7 +209,7 @@ def _dossier_payload(store: Store, chain: str, address: str, memory: str) -> dic
 
     grounded = sum(1 for s in stones["COLD"] if s["grounding"] == "grounded")
 
-    # What Cairn published about this counterparty on Base, if anything. An
+    # What Firsthand published about this counterparty on Base, if anything. An
     # attestation is a fact about the agent, so it is read out of the dossier
     # rather than out of a side table the verdict cannot see.
     with store.use(tenant):
@@ -251,10 +251,10 @@ RECENT_LIMIT = 8
 
 
 def _remember_lookup(store: Store, tenant: str) -> None:
-    """Keep the last few lookups in Cairn's own dossier, not in a browser.
+    """Keep the last few lookups in Firsthand's own dossier, not in a browser.
 
     Part 8 asks for recent lookups persisted in memory rather than
-    localStorage, so they live in `cairn:self` where the rest of Cairn's
+    localStorage, so they live in `cairn:self` where the rest of Firsthand's
     operating state does. HOT is rewritten in place, so this is bounded.
 
     Best effort on purpose. A convenience list must never be the reason a read
@@ -275,7 +275,7 @@ def _remember_lookup(store: Store, tenant: str) -> None:
 
 @app.get("/v1/recent")
 def recent(memory: str = Query("on", pattern="^(on|off)$")) -> dict[str, Any]:
-    """The last few counterparties anyone looked up, from Cairn's own dossier."""
+    """The last few counterparties anyone looked up, from Firsthand's own dossier."""
     with _store_for(memory) as store, store.use(SELF_TENANT):
         held = store.verdict() or {}
     rows = held.get("recent_lookups")
@@ -323,10 +323,10 @@ def reviewer(
 
 @app.get("/v1/stats")
 def stats(memory: str = Query("on", pattern="^(on|off)$")) -> dict[str, Any]:
-    """What Cairn currently holds, read from its own dossier.
+    """What Firsthand currently holds, read from its own dossier.
 
     Written by scripts/summarise.py into `cairn:self`, the tenant reserved for
-    Cairn's own operating state. Every figure the landing page shows comes from
+    Firsthand's own operating state. Every figure the landing page shows comes from
     here, so a number on the page is a count of rows in the database rather than
     a constant in a template. With memory off there is nothing to report, which
     is the honest answer and the one the page renders.
@@ -368,7 +368,7 @@ def dossier(
     chain: str = "base",
     memory: str = Query("on", pattern="^(on|off)$"),
 ) -> dict[str, Any]:
-    """Everything Cairn holds about one counterparty, arranged by tier."""
+    """Everything Firsthand holds about one counterparty, arranged by tier."""
     with _store_for(memory) as store:
         payload = _dossier_payload(store, chain, address, memory)
         if memory != "off":

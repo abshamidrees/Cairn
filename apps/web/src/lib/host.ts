@@ -1,13 +1,13 @@
 /**
  * Every internal link is built from here rather than hardcoded, so a link to a
- * dossier lands on explorer.usecairn.xyz/0xabc and not on the path form. The
+ * dossier lands on explorer.usefirsthand.xyz/0xabc and not on the path form. The
  * middleware rewrites subdomains onto path roots; this is the inverse, and the
  * two must agree.
  */
 
 export type Surface = "landing" | "explorer" | "docs";
 
-export const ROOT_DOMAIN = "usecairn.xyz";
+export const ROOT_DOMAIN = "usefirsthand.xyz";
 
 const SUBDOMAIN: Record<Surface, string | null> = {
   landing: null,
@@ -49,7 +49,7 @@ export function urlFor(surface: Surface, path = ""): string {
 
 /**
  * The canonical form is always the subdomain, never the path form, or
- * usecairn.xyz/docs and docs.usecairn.xyz both index as duplicates.
+ * usefirsthand.xyz/docs and docs.usefirsthand.xyz both index as duplicates.
  */
 export function canonicalFor(surface: Surface, path = ""): string {
   const suffix = path && !path.startsWith("/") ? `/${path}` : path;

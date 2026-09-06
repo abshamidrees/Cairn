@@ -1,7 +1,7 @@
-"""Publish Cairn's grounded scan of the indexed Base set.
+"""Publish Firsthand's grounded scan of the indexed Base set.
 
 An aggregate finding about how the ERC-8004 reputation layer is used, computed
-from what Cairn actually witnessed and verifiable against the same chain data.
+from what Firsthand actually witnessed and verifiable against the same chain data.
 
     python scripts/scan.py --db data/memory.db --out apps/web/public/scan.json
 
@@ -122,7 +122,7 @@ def build(store: MemoryStore) -> dict[str, Any]:
             ),
             "suspect_note": (
                 "Zero. No agent in the indexed set has two conflicting owner records, "
-                "and Cairn does not publish a suspect standing it cannot point at."
+                "and Firsthand does not publish a suspect standing it cannot point at."
             ),
         },
     }

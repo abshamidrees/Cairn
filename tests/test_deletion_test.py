@@ -1,6 +1,6 @@
 """Tests for the deletion test, which is the gate the whole submission rests on.
 
-The script is CI's tripwire: it must exit non-zero the day Cairn starts
+The script is CI's tripwire: it must exit non-zero the day Firsthand starts
 answering without reading its record. A tripwire nothing tests is a tripwire
 nobody knows is disconnected.
 """

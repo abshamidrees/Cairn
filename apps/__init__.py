@@ -1,1 +1,1 @@
-"""Cairn monorepo applications."""
+"""Firsthand monorepo applications."""

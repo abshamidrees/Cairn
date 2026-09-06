@@ -1,6 +1,6 @@
 """The verdict engine. Arithmetic over the record, never a model call.
 
-A verdict is what Cairn currently believes about one counterparty, carrying a
+A verdict is what Firsthand currently believes about one counterparty, carrying a
 confidence and a basis: the specific observations the judgment rests on. Nothing
 in this module calls an LLM. The rationale sentence rendered elsewhere is
 presentation; the decision here is deterministic, and running it twice over the
@@ -57,7 +57,7 @@ GROUNDED_MIN_CORROBORATED = 3
 #: cheapest quantity on this chain to manufacture, a median of $0.0027 to move,
 #: and the busiest dossier in the indexed set is 100 pieces of feedback from a
 #: single claimant. Scoring that as high confidence would reward exactly the
-#: behaviour Cairn exists to catch.
+#: behaviour Firsthand exists to catch.
 CONFIDENCE_FULL_SOURCES = 5
 
 #: Confidence weights. They sum to 1 before any penalty is applied.
@@ -83,7 +83,7 @@ _CLAIM = "erc8004_claim"
 class EmptyBasisError(RuntimeError):
     """Raised if a code path reaches `suspect` without naming an observation.
 
-    Part 21 makes this a bug rather than a silent downgrade: Cairn publishes
+    Part 21 makes this a bug rather than a silent downgrade: Firsthand publishes
     judgments about real, named third parties, and an accusation it cannot
     point at is the one mistake that outlives the hackathon.
     """
@@ -172,7 +172,7 @@ class ReviewerWeight:
 
 @dataclass(frozen=True)
 class Verdict:
-    """Cairn's current judgment about one counterparty."""
+    """Firsthand's current judgment about one counterparty."""
 
     counterparty: str
     standing: Standing
@@ -212,7 +212,7 @@ class _Tally:
     corroborated: int = 0
     unavailable: set[str] = field(default_factory=set)
     #: Distinct parties behind the record. A claimant address, or "chain" for
-    #: something Cairn read from the registry itself rather than from anyone.
+    #: something Firsthand read from the registry itself rather than from anyone.
     sources: set[str] = field(default_factory=set)
 
 
@@ -237,7 +237,7 @@ def reviewer_weight(
 
     `witnessed` maps agent id to the set of claimants seen for that agent, taken
     from the dossier under evaluation. Corroboration is therefore only counted
-    over agents currently in view: Cairn does not hold a global agent index, and
+    over agents currently in view: Firsthand does not hold a global agent index, and
     inventing one to raise a reviewer's weight would be exactly the kind of
     unbacked number this project exists to replace. Anything below
     PROVISIONAL_BELOW corroborated outcomes carries the neutral weight and is
@@ -279,7 +279,7 @@ def reviewer_weight(
 def _contradictions(observations: Sequence[Mapping[str, Any]]) -> list[ContradictionRef]:
     """Find what the record itself disagrees about.
 
-    One agent id registered to two different owners is a disagreement Cairn can
+    One agent id registered to two different owners is a disagreement Firsthand can
     point at: both observations are chain-witnessed, both are in the journal,
     and they cannot both describe the present. Nothing here infers intent, and
     a source that was never fetched contributes nothing.
@@ -410,7 +410,7 @@ def confidence_for(
     would make confidence purchasable.
 
     Returns None when there is nothing to be confident about. A confidence of
-    0.0 means Cairn looked and found the record worthless; None means there was
+    0.0 means Firsthand looked and found the record worthless; None means there was
     no record, and the two must not render the same.
     """
     if n_observations <= 0:
@@ -451,7 +451,7 @@ def evaluate(
     now: datetime | None = None,
     write: bool = True,
 ) -> Verdict:
-    """Judge one counterparty from what Cairn has witnessed.
+    """Judge one counterparty from what Firsthand has witnessed.
 
     Reads the counterparty's dossier, then the dossier of every claimant who has
     spoken about them, then writes back to the counterparty's. Three tenants

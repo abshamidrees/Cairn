@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { CairnIcon, CairnMark, type Standing } from "@/components/cairn-mark";
+import { FirsthandIcon, FirsthandMark, type Standing } from "@/components/firsthand-mark";
 import {
   BrowserFrame,
   Button,
@@ -74,16 +74,16 @@ export default function KitchenSinkPage() {
           Every component at every state. Fixtures above, the live API below.
         </p>
 
-        <Section title="CairnMark">
+        <Section title="FirsthandMark">
           <div className="flex flex-wrap gap-10">
             {STANDINGS.map((standing) => (
               <div key={standing} className="flex flex-col items-center gap-3">
-                <CairnMark standing={standing} width={56} height={56} />
+                <FirsthandMark standing={standing} width={56} height={56} />
                 <span className="font-mono text-[0.6875rem] text-scree">{standing}</span>
               </div>
             ))}
             <div className="flex flex-col items-center gap-3">
-              <CairnIcon width={16} height={16} />
+              <FirsthandIcon width={16} height={16} />
               <span className="font-mono text-[0.6875rem] text-scree">icon 16px</span>
             </div>
           </div>
@@ -135,8 +135,8 @@ export default function KitchenSinkPage() {
 
         <Section title="TerminalCard and BrowserFrame">
           <div className="grid gap-6 md:grid-cols-2">
-            <TerminalCard command="curl https://api.usecairn.xyz/v1/lookup/0x..." />
-            <BrowserFrame label="explorer.usecairn.xyz">
+            <TerminalCard command="curl https://api.usefirsthand.xyz/v1/lookup/0x..." />
+            <BrowserFrame label="explorer.usefirsthand.xyz">
               <p className="text-slate">A real UI fragment sits here, never an illustration.</p>
             </BrowserFrame>
           </div>
@@ -151,11 +151,11 @@ export default function KitchenSinkPage() {
             </div>
             <EmptyState
               title="No observations."
-              detail="Cairn has never watched this agent do anything."
+              detail="Firsthand has never watched this agent do anything."
               action={<Button variant="ghost">Start watching</Button>}
             />
             <ErrorState
-              title="Cairn could not reach its record."
+              title="Firsthand could not reach its record."
               detail="The API did not answer. The record lives on the machine that serves it."
             />
           </div>
@@ -257,7 +257,7 @@ export default function KitchenSinkPage() {
           <ClaimBasis
             claim={
               <p className="font-display text-[2rem] leading-tight text-graphite">
-                An observation is something Cairn watched happen.
+                An observation is something Firsthand watched happen.
               </p>
             }
             basisLabel="the basis"

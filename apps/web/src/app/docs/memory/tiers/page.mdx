@@ -1,7 +1,7 @@
 # The five tiers
 
 **Memory is not one bucket.** Where a fact lives is information, and the tier an observation sits in
-is a decision Cairn makes and revises.
+is a decision Firsthand makes and revises.
 
 | tier | API | what lives there | rows held |
 | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ That distinction is the whole product in one operational decision.
 
 `archive_entity` moves a row out of the entities table rather than flagging it. Afterwards
 `list_entities` returns nothing under any status, `get_entity` raises, and archive is not a valid
-search tier, so the reason cannot be read back through the client at all. Cairn therefore journals
+search tier, so the reason cannot be read back through the client at all. Firsthand therefore journals
 every archival with the body it retired, or a demotion would leave no auditable trace.
 
 ## The free tier cap

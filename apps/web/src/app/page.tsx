@@ -33,8 +33,8 @@ const TIER_MEANING: Readonly<Record<string, string>> = {
 const STANDING_MEANING: readonly (readonly ["grounded" | "thin" | "suspect" | "dormant", string])[] =
   [
     ["grounded", "Three or more corroborated observations, and nothing contradicting itself."],
-    ["thin", "Fewer than three corroborated observations. Cairn has too little to go on."],
-    ["suspect", "The record contradicts itself, and Cairn can name the observations."],
+    ["thin", "Fewer than three corroborated observations. Firsthand has too little to go on."],
+    ["suspect", "The record contradicts itself, and Firsthand can name the observations."],
     ["dormant", "Nothing witnessed inside the decay window."],
   ];
 
@@ -93,9 +93,9 @@ function StatStrip() {
   );
 }
 
-/* ---- 01 What Cairn holds ----------------------------------------------- */
+/* ---- 01 What Firsthand holds ----------------------------------------------- */
 
-function WhatCairnHolds({ stats }: { readonly stats: Stats }) {
+function WhatFirsthandHolds({ stats }: { readonly stats: Stats }) {
   const examples = stats.observation_examples;
   if (examples.length === 0) return null;
 
@@ -104,15 +104,15 @@ function WhatCairnHolds({ stats }: { readonly stats: Stats }) {
       <ClaimBasis
         claim={
           <>
-            <Claim>An observation is something Cairn watched happen.</Claim>
+            <Claim>An observation is something Firsthand watched happen.</Claim>
             <p className="mt-6 max-w-[34rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
-              Not a rating somebody left. Each one is an event on Base that Cairn read from
+              Not a rating somebody left. Each one is an event on Base that Firsthand read from
               the registry itself and hashed, so the judgment it supports can be traced back to
               the transaction it came from.
             </p>
           </>
         }
-        basisLabel={`the ${examples.length} kinds Cairn currently holds`}
+        basisLabel={`the ${examples.length} kinds Firsthand currently holds`}
         basis={
           <ul className="space-y-5">
             {examples.map((example) => (
@@ -143,13 +143,13 @@ function FiveTiers({ stats }: { readonly stats: Stats }) {
             <Claim>Memory is not one bucket.</Claim>
             <p className="mt-6 max-w-[34rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
               Where a fact lives is information. An observation seen once stays in the journal.
-              Seen three times, Cairn promotes it to a durable fact and records the promotion.
+              Seen three times, Firsthand promotes it to a durable fact and records the promotion.
               When the evidence behind it ages out, the fact is archived with a reason rather
               than deleted.
             </p>
           </>
         }
-        basisLabel="rows Cairn holds right now"
+        basisLabel="rows Firsthand holds right now"
         basis={
           <table className="w-full border-collapse">
             <thead>
@@ -201,7 +201,7 @@ function ReviewerWeighting({ stats }: { readonly stats: Stats }) {
             <Claim>We score the reviewers too.</Claim>
             <p className="mt-6 max-w-[34rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
               ERC-8004 defers this layer to a reviewer reputation system that, in its own words,
-              does not yet exist. Cairn keeps a dossier on claimants as well as counterparties,
+              does not yet exist. Firsthand keeps a dossier on claimants as well as counterparties,
               and weighs a claim by whether anyone else independently witnessed the same agent.
               A claimant cannot corroborate itself.
             </p>
@@ -229,7 +229,7 @@ function ReviewerWeighting({ stats }: { readonly stats: Stats }) {
             <p className="pt-4 text-slate">
               {reviewer.claims} claims, none of them corroborated by another party. The weight
               stays at the neutral {reviewer.weight.toFixed(2)} and is returned flagged, because
-              having spoken often is not evidence and Cairn will not treat it as any.
+              having spoken often is not evidence and Firsthand will not treat it as any.
             </p>
           </>
         }
@@ -267,7 +267,7 @@ const DELETION_OUTPUT = `  memory ON      standing=grounded  confidence=0.84  ba
   memory OFF     standing=thin      confidence=-     basis=0  observations
                  ↳ verdict engine returned NO_BASIS
 
-  Cairn's core function is unavailable without the memory layer.  PASS`;
+  Firsthand's core function is unavailable without the memory layer.  PASS`;
 
 function DeletionPanel() {
   return (
@@ -320,7 +320,7 @@ export default async function LandingPage() {
                 about to pay.
               </h1>
               <p className="mt-8 max-w-[34rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
-                Cairn keeps the record. Every verdict points at the observations it came from.
+                Firsthand keeps the record. Every verdict points at the observations it came from.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <a
@@ -339,7 +339,7 @@ export default async function LandingPage() {
             </div>
 
             {/* The Stack replaces the dashboard screenshot every competitor puts
-                here: the characteristic thing about Cairn is that it can show
+                here: the characteristic thing about Firsthand is that it can show
                 you its own basis, so that is what the hero shows. */}
             <div>
               <DossierStack address={HERO_DOSSIER} />
@@ -349,7 +349,7 @@ export default async function LandingPage() {
 
         <div className="mx-auto max-w-[78rem] px-6">
           <StatStrip />
-          {stats ? <WhatCairnHolds stats={stats} /> : null}
+          {stats ? <WhatFirsthandHolds stats={stats} /> : null}
           {stats ? <FiveTiers stats={stats} /> : null}
           {stats ? <ReviewerWeighting stats={stats} /> : null}
           {stats ? <Standing stats={stats} /> : null}
@@ -360,7 +360,7 @@ export default async function LandingPage() {
                 <>
                   <Claim>Ask before you pay.</Claim>
                   <p className="mt-6 max-w-[34rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
-                    One call, before the escrow is funded. If Cairn has not watched the
+                    One call, before the escrow is funded. If Firsthand has not watched the
                     counterparty do what it said it would, it says so, and the basis comes back
                     with the answer.
                   </p>

@@ -1,4 +1,4 @@
-"""Cairn's memory adapter, and the only module that imports sibyl_memory_client.
+"""Firsthand's memory adapter, and the only module that imports sibyl_memory_client.
 
 Everything else reaches Sibyl Memory through `Store`. That boundary is what makes
 the deletion test a two-line swap: `NullStore` satisfies the same protocol with
@@ -81,7 +81,7 @@ def counterparty_tenant(chain: str, address: str) -> str:
 
 
 def reviewer_tenant(address: str) -> str:
-    """One isolated dossier per reviewer. Cairn keeps a record on them too."""
+    """One isolated dossier per reviewer. Firsthand keeps a record on them too."""
     return f"rv:{address.lower()}"
 
 
@@ -96,7 +96,7 @@ def _parse(stamp: str) -> datetime:
 
 @dataclass(frozen=True)
 class Observation:
-    """One event Cairn watched happen, before it reaches the journal.
+    """One event Firsthand watched happen, before it reaches the journal.
 
     `pattern` is the behaviour this event is an instance of. Three instances of
     one pattern promote it to a durable fact.
@@ -135,7 +135,7 @@ class Promotion:
 
 @dataclass(frozen=True)
 class Contradiction:
-    """Cairn's own record disagreeing with itself. The only route to `suspect`."""
+    """Firsthand's own record disagreeing with itself. The only route to `suspect`."""
 
     category: str
     name: str
@@ -373,7 +373,7 @@ class MemoryStore:
         return [str(row[0]) for row in rows if str(row[0]).startswith(prefix)]
 
     def tier_counts(self) -> dict[str, int]:
-        """How many rows Cairn currently holds in each tier, across every dossier.
+        """How many rows Firsthand currently holds in each tier, across every dossier.
 
         This is the five-tier policy made countable. An empty tier is reported as
         zero rather than hidden: nothing has aged out yet, and saying so is more
@@ -412,7 +412,7 @@ class MemoryStore:
     def clear_derived_state(self) -> int:
         """Drop every HOT verdict. Returns how many were dropped.
 
-        HOT is the one tier Cairn can afford to lose. A verdict is arithmetic
+        HOT is the one tier Firsthand can afford to lose. A verdict is arithmetic
         over the journal, so any of these can be recomputed exactly by asking
         again; the ledger they were derived from is untouched. That is what
         makes this safe where deleting an observation would not be.
@@ -549,7 +549,7 @@ class MemoryStore:
         return str(event_id)
 
     def drain_forward(self) -> list[dict[str, Any]]:
-        """Cairn's first act on boot: take what the last session left behind.
+        """Firsthand's first act on boot: take what the last session left behind.
 
         The cursor lives in HOT state, so a baton is handed over exactly once
         however many times the process restarts.
@@ -575,7 +575,7 @@ class MemoryStore:
 
 
 class NullStore:
-    """Cairn with its memory removed. Every read empty, every write a no-op.
+    """Firsthand with its memory removed. Every read empty, every write a no-op.
 
     This is the other half of the deletion test. It exists so the swap is one
     line at the call site rather than a branch inside the engine.

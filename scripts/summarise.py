@@ -1,4 +1,4 @@
-"""Evaluate every indexed counterparty and record what Cairn currently holds.
+"""Evaluate every indexed counterparty and record what Firsthand currently holds.
 
 Two things happen here, and both are ordinary product behaviour rather than
 bookkeeping for a web page.
@@ -8,8 +8,8 @@ and journals the evaluation. Until this runs, the HOT tier is empty because no
 verdict has ever been asked for.
 
 The result is summarised into `cairn:self`, the tenant the brief reserves for
-Cairn's own operating state. The landing page reads that summary through the
-API, so every figure on the page is a count of rows Cairn actually holds rather
+Firsthand's own operating state. The landing page reads that summary through the
+API, so every figure on the page is a count of rows Firsthand actually holds rather
 than a number typed into a template.
 
     python scripts/summarise.py --db data/memory.db
@@ -90,7 +90,7 @@ def build(store: MemoryStore, *, write_limit: int = 0) -> dict[str, Any]:
                 )
 
     # Claims live in the claimant's own dossier, so a total that skipped them
-    # would undercount what Cairn holds by more than a third.
+    # would undercount what Firsthand holds by more than a third.
     for tenant in reviewers:
         with store.use(tenant):
             for row in store.observations():

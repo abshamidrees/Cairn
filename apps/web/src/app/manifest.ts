@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Cairn",
-    short_name: "Cairn",
+    name: "Firsthand",
+    short_name: "Firsthand",
     description: "A memory-native trust layer for agent commerce.",
     start_url: "/",
     display: "standalone",

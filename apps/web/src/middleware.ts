@@ -7,11 +7,11 @@ const SUBDOMAIN_ROOT: Record<string, string> = {
 
 export function middleware(req: NextRequest) {
   const host = req.headers.get("host")?.split(":")[0] ?? "";
-  const sub = host.endsWith("usecairn.xyz") ? host.split(".")[0] : null;
+  const sub = host.endsWith("usefirsthand.xyz") ? host.split(".")[0] : null;
   const root = sub ? SUBDOMAIN_ROOT[sub] : undefined;
   if (!root) return NextResponse.next();
 
-  // explorer.usecairn.xyz/0xabc  ->  /explorer/0xabc
+  // explorer.usefirsthand.xyz/0xabc  ->  /explorer/0xabc
   const url = req.nextUrl.clone();
   if (!url.pathname.startsWith(root)) url.pathname = root + url.pathname;
   return NextResponse.rewrite(url);

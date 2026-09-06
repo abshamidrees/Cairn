@@ -1,4 +1,4 @@
-"""Run one ACP job with Cairn as provider and Evaluator.
+"""Run one ACP job with Firsthand as provider and Evaluator.
 
 Everything here drives `@virtuals-protocol/acp-cli` by subprocess with --json.
 
@@ -87,7 +87,7 @@ def main(argv: list[str] | None = None) -> int:
             for job in jobs[:5]:
                 print(f"    {job.get('id')}  {job.get('status')}")
             if not jobs:
-                _print_create_hint(str(who.get("walletAddress", "<cairn>")))
+                _print_create_hint(str(who.get("walletAddress", "<firsthand>")))
             return 0
 
         if args.action == "fulfil":

@@ -7,7 +7,7 @@ import { ObservationCard, Stone } from "@/components/stone";
 import { ErrorState, VerdictLine } from "@/components/primitives";
 
 /**
- * The Stack renders one counterparty's dossier as a literal cairn.
+ * The Stack renders one counterparty's dossier as a literal firsthand.
  *
  * The five bands are the five Sibyl Memory tiers, not decoration. A stone sits
  * in the band its row actually lives in, so a judge reading the README can match
@@ -250,7 +250,7 @@ export function DossierStack({ address }: { readonly address: string }) {
   if (error !== null) {
     return (
       <ErrorState
-        title="Cairn could not reach its record."
+        title="Firsthand could not reach its record."
         detail={`The API did not answer: ${error}. The record is on the machine that serves it, so this is a connection problem rather than an empty dossier.`}
       />
     );

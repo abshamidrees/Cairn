@@ -1,9 +1,9 @@
 /**
- * What Cairn currently holds, fetched on the server for the landing page.
+ * What Firsthand currently holds, fetched on the server for the landing page.
  *
  * Every figure the page prints comes from here. When the API cannot be reached
  * this returns null and the sections that depend on it are not rendered at all,
- * because a section that needs a number Cairn does not have is a section that
+ * because a section that needs a number Firsthand does not have is a section that
  * should not exist. Showing a zero would be a claim; showing nothing is not.
  */
 

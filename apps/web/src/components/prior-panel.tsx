@@ -1,14 +1,14 @@
 import type { VerdictPayload } from "@/lib/api";
 
 /**
- * What Cairn believed before the most recent observation, and what moved.
+ * What Firsthand believed before the most recent observation, and what moved.
  *
  * This is the screen that shows memory doing work rather than asserting that it
  * does: a verdict without a prior is a guess, and a verdict with one is a
  * position that changed for a reason it can name. Part 8 keeps it out of a
  * collapsible and above the fold on desktop, so it is neither.
  *
- * Nothing here is inferred. When Cairn has no prior it says so, because a first
+ * Nothing here is inferred. When Firsthand has no prior it says so, because a first
  * verdict having no history is a fact about the record, not a gap to paper over.
  */
 export function PriorPanel({
@@ -37,7 +37,7 @@ export function PriorPanel({
       {!hadPrior ? (
         <div className="mt-4 max-w-[48rem]">
           <p className="font-display text-[1.5rem] text-graphite">
-            This is the first verdict Cairn has formed about this counterparty.
+            This is the first verdict Firsthand has formed about this counterparty.
           </p>
           <p className="mt-2 text-slate">
             {prior?.from === "warm-entities"
@@ -51,8 +51,8 @@ export function PriorPanel({
             <div className="min-w-0">
               <p className="font-display text-[1.5rem] text-graphite">
                 {standingMoved
-                  ? `Cairn moved this counterparty from ${prior.standing} to ${verdict.standing}.`
-                  : `Cairn still reads this counterparty as ${verdict.standing}.`}
+                  ? `Firsthand moved this counterparty from ${prior.standing} to ${verdict.standing}.`
+                  : `Firsthand still reads this counterparty as ${verdict.standing}.`}
               </p>
               <p className="mt-2 max-w-[36rem] text-slate">
                 {standingMoved

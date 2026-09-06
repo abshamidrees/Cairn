@@ -1,4 +1,4 @@
-"""Index the ERC-8004 registries on Base into observations Cairn has witnessed.
+"""Index the ERC-8004 registries on Base into observations Firsthand has witnessed.
 
 Two registries are read on chain 8453:
 
@@ -101,7 +101,7 @@ class LogRecord:
 class Registration:
     """An agent's off-chain registration file, if it could be read.
 
-    `available` is the point of this type. A file Cairn could not fetch is not a
+    `available` is the point of this type. A file Firsthand could not fetch is not a
     file that says nothing, and the two must never collapse into each other.
     """
 
@@ -251,7 +251,7 @@ class HttpFetcher:
             # S310 on both calls: the scheme is checked above, so file: and
             # custom schemes cannot reach here from an on-chain string.
             request = urllib.request.Request(  # noqa: S310
-                url, headers={"User-Agent": "cairn-indexer"}
+                url, headers={"User-Agent": "firsthand-indexer"}
             )
             opened = urllib.request.urlopen(  # noqa: S310
                 request, timeout=REGISTRATION_FETCH_TIMEOUT

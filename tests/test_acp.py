@@ -98,7 +98,7 @@ def test_the_deliverable_is_sent_as_compact_json() -> None:
         standing="grounded",
         confidence=0.84,
         basis=("o1", "o2"),
-        methodology="https://docs.usecairn.xyz/methodology",
+        methodology="https://docs.usefirsthand.xyz/methodology",
     )
     Acp(runner=runner).submit("job-1", deliverable)
 
@@ -108,7 +108,7 @@ def test_the_deliverable_is_sent_as_compact_json() -> None:
     assert '"basis":["o1","o2"]' in payload
 
 
-# ---- what Cairn sells ----------------------------------------------------
+# ---- what Firsthand sells ----------------------------------------------------
 
 
 def test_the_deliverable_carries_the_observation_ids(store: MemoryStore) -> None:

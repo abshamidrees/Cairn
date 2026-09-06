@@ -1,7 +1,7 @@
 [project]
-name = "cairn-agent"
+name = "firsthand-agent"
 version = "0.1.0"
-description = "Cairn, a memory-native trust layer for agent commerce."
+description = "Firsthand, a memory-native trust layer for agent commerce."
 requires-python = ">=3.12"
 license = { text = "MIT" }
 

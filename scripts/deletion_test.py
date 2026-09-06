@@ -1,5 +1,5 @@
 """
-deletion_test.py, proof that Cairn's memory layer is load-bearing.
+deletion_test.py, proof that Firsthand's memory layer is load-bearing.
 
 The Sibyl Labs Hackathon gate is: remove the memory layer, does the project
 still do what it claims? If yes it is a wrapper and it is disqualified.
@@ -10,7 +10,7 @@ adapter replaced by a null adapter whose every read returns empty and every
 write is a no-op, and prints both results side by side.
 
 It exits non-zero if the memory-off run ever produces a usable verdict, so it
-can sit in CI and fail the build the day someone accidentally makes Cairn work
+can sit in CI and fail the build the day someone accidentally makes Firsthand work
 without its memory.
 
     python scripts/deletion_test.py --agent 0x...
@@ -21,7 +21,7 @@ Expected output:
   memory OFF     standing=thin      confidence=-     basis=0  observations
                  ↳ verdict engine returned NO_BASIS
 
-  Cairn's core function is unavailable without the memory layer.  PASS
+  Firsthand's core function is unavailable without the memory layer.  PASS
 
 The swap happens at the adapter boundary, not inside the engine. `evaluate`
 takes a `Store` and cannot tell the two apart, which is what makes this a
@@ -76,7 +76,7 @@ def _is_usable(verdict: Verdict) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Prove Cairn's core function requires the memory layer."
+        description="Prove Firsthand's core function requires the memory layer."
     )
     parser.add_argument("--agent", required=True, help="counterparty address or agent id")
     parser.add_argument("--chain", default="base", help="chain the counterparty is on")
@@ -126,11 +126,11 @@ def main(argv: list[str] | None = None) -> int:
     print()
 
     if passed:
-        print("  Cairn's core function is unavailable without the memory layer.  PASS")
+        print("  Firsthand's core function is unavailable without the memory layer.  PASS")
         return EXIT_PASS
 
     print("  The memory-off run produced a usable verdict.  FAIL")
-    print("  Cairn answered without reading its record, so the memory is not load-bearing.")
+    print("  Firsthand answered without reading its record, so the memory is not load-bearing.")
     return EXIT_FAIL
 
 

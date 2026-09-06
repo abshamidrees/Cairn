@@ -1,6 +1,6 @@
 # Attestations
 
-**A verdict published on Base, so the record survives outside Cairn.** There is no separate
+**A verdict published on Base, so the record survives outside Firsthand.** There is no separate
 attestation endpoint: an attestation is a fact about a counterparty, so it comes back on the
 dossier.
 
@@ -34,7 +34,7 @@ attest(
 ```
 
 The basis hash is taken over sorted observation ids, so a reader holding the dossier can recompute
-it and prove the published verdict is the one Cairn held. Sorting matters: the hash must not depend
+it and prove the published verdict is the one Firsthand held. Sorting matters: the hash must not depend
 on the order rows came back from the database.
 
 ## What will not be published
@@ -58,4 +58,4 @@ The dry run prints exactly what would be sent without sending it.
 ERC-8004's own reputation registry has an unverified implementation, and the selector observed on
 the wire does not match any signature we could reconstruct. Calling an unverified contract with a
 guessed signature to publish a judgment about a real third party is not a risk worth taking, so
-Cairn publishes into a contract small enough to read in a minute instead.
+Firsthand publishes into a contract small enough to read in a minute instead.

@@ -65,7 +65,7 @@ def probe(db_path: Path) -> dict[str, Any]:
     # flag: after archiving, list_entities returns nothing under any status and
     # get_entity raises NotFoundError. The archive is not readable through the
     # client API at all, and "archive" is not a valid search tier, so the reason
-    # cannot be read back. Cairn therefore journals every archival itself.
+    # cannot be read back. Firsthand therefore journals every archival itself.
     m.set_tenant(COUNTERPARTY_A)
     receipt = m.archive_entity("identity", "declared-service", reason="phase 0 probe")
     still_listed = m.list_entities("identity")

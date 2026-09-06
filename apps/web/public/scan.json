@@ -36,6 +36,6 @@
     "suspect": 0,
     "dormant": 0,
     "grounded_requires": "3 or more observations corroborated by a different party",
-    "suspect_note": "Zero. No agent in the indexed set has two conflicting owner records, and Cairn does not publish a suspect standing it cannot point at."
+    "suspect_note": "Zero. No agent in the indexed set has two conflicting owner records, and Firsthand does not publish a suspect standing it cannot point at."
   }
 }

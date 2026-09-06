@@ -5,24 +5,24 @@ import { useState } from "react";
 /**
  * The install line and the four lines that use it.
  *
- * Both tabs show the same decision: ask Cairn what it has witnessed, and refuse
+ * Both tabs show the same decision: ask Firsthand what it has witnessed, and refuse
  * to fund if the answer is not grounded. Copying is a state change, not a
  * motion moment: the label swaps and nothing moves.
  */
 
-const INSTALL = "pip install cairn";
+const INSTALL = "pip install firsthand";
 
 const SAMPLES: readonly { readonly label: string; readonly code: string }[] = [
   {
     label: "Python",
-    code: `verdict = cairn.lookup("0x01f9…84d3")
+    code: `verdict = firsthand.lookup("0x01f9…84d3")
 if verdict.standing != "grounded":
     raise Refuse(verdict.basis)      # nothing witnessed, so do not pay
 escrow.fund(job_id)`,
   },
   {
     label: "CLI",
-    code: `curl -s "$CAIRN/v1/lookup/0x01f9…84d3" \\
+    code: `curl -s "$FIRSTHAND/v1/lookup/0x01f9…84d3" \\
   | jq -e '.standing == "grounded"' \\
   && acp client fund --job-id 42 --chain-id 8453 \\
   || echo "no grounded record, holding the escrow"`,

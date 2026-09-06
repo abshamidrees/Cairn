@@ -6,7 +6,7 @@ import type { Stone } from "@/lib/api";
 
 /**
  * The basis: every observation the verdict rests on, sortable, each row
- * followable back to the transaction Cairn witnessed it in.
+ * followable back to the transaction Firsthand witnessed it in.
  *
  * Sorting is a state change, not a motion moment. The rows reorder.
  */

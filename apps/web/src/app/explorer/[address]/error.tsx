@@ -9,7 +9,7 @@ export default function DossierError({ reset }: { error: Error; reset: () => voi
         could not read the record
       </p>
       <h1 className="mt-3 max-w-[22ch] text-[length:var(--text-section)] leading-[var(--text-section-lead)] tracking-[var(--text-section-track)]">
-        Cairn stopped before it could answer.
+        Firsthand stopped before it could answer.
       </h1>
       <p className="mt-6 max-w-[36rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
         Nothing on this screen should be read as a judgment about this counterparty, in either

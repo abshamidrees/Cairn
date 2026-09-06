@@ -1,8 +1,8 @@
-"""Publish a verdict on Base, so the record survives outside Cairn.
+"""Publish a verdict on Base, so the record survives outside Firsthand.
 
 ERC-8004 defers verification to a Validation Registry with no mainnet
 deployment, so there is nowhere on Base to write a grounded verdict into. This
-publishes into `packages/chain/contracts/CairnAttestations.sol` instead, which
+publishes into `packages/chain/contracts/FirsthandAttestations.sol` instead, which
 is small enough to read in a minute and stores nothing it cannot evidence.
 
 The reputation registry's own write path was considered and rejected. Its
@@ -30,7 +30,7 @@ from apps.agent.judge.verdict import Verdict
 from apps.agent.memory.store import Store, counterparty_tenant
 
 CONTRACT = Path(__file__).resolve().parent.parent.parent.parent / (
-    "packages/chain/contracts/CairnAttestations.sol"
+    "packages/chain/contracts/FirsthandAttestations.sol"
 )
 SOLC_VERSION = "0.8.24"
 BASE_CHAIN_ID = 8453
@@ -85,7 +85,7 @@ def basis_hash(observation_ids: tuple[str, ...]) -> bytes:
     """keccak over the observation ids, in the order the verdict used them.
 
     A reader holding the dossier can recompute this and prove the published
-    verdict is the one Cairn actually held. Sorting is deliberate: the hash must
+    verdict is the one Firsthand actually held. Sorting is deliberate: the hash must
     not depend on the order rows came back from the database.
     """
     joined = "\n".join(sorted(observation_ids))
@@ -140,7 +140,7 @@ def compile_contract() -> dict[str, Any]:
     compiled = solcx.compile_files(
         [str(CONTRACT)], output_values=["abi", "bin"], optimize=True
     )
-    key = next(k for k in compiled if "CairnAttestations" in k)
+    key = next(k for k in compiled if "FirsthandAttestations" in k)
     return {"abi": compiled[key]["abi"], "bytecode": compiled[key]["bin"]}
 
 
@@ -149,7 +149,7 @@ class Attestor:
 
     def __init__(self, w3: Web3, private_key: str, contract_address: str | None = None) -> None:
         if not private_key:
-            raise AttestationError("no attestor key: set CAIRN_ATTESTOR_KEY")
+            raise AttestationError("no attestor key: set FIRSTHAND_ATTESTOR_KEY")
         self._w3 = w3
         self._account = w3.eth.account.from_key(private_key)
         self._artifact = compile_contract()
@@ -250,8 +250,8 @@ def _usable_rpc(value: str | None) -> str | None:
 def attestor_from_env(rpc_url: str | None = None) -> Attestor:
     """Build an Attestor from the environment. The key is never logged."""
     url = rpc_url or _usable_rpc(os.environ.get("BASE_RPC_URL")) or "https://mainnet.base.org"
-    key = os.environ.get("CAIRN_ATTESTOR_KEY", "")
-    contract = os.environ.get("CAIRN_ATTESTATION_CONTRACT") or None
+    key = os.environ.get("FIRSTHAND_ATTESTOR_KEY", "")
+    contract = os.environ.get("FIRSTHAND_ATTESTATION_CONTRACT") or None
     return Attestor(Web3(Web3.HTTPProvider(url)), key, contract)
 
 

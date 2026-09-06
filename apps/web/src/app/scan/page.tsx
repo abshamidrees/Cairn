@@ -116,7 +116,7 @@ export default async function ScanPage() {
 
         <section className="mt-16 grid gap-12 border-t border-seam pt-10 md:grid-cols-2">
           <div>
-            <p className="eyebrow">What Cairn read</p>
+            <p className="eyebrow">What Firsthand read</p>
             <dl className="mt-4 space-y-2 font-mono text-[0.8125rem]">
               {Object.entries(indexed).map(([key, value]) => (
                 <div key={key} className="flex justify-between gap-4 border-b border-seam pb-2">
@@ -180,7 +180,7 @@ export default async function ScanPage() {
           <p className="eyebrow">What this does not say</p>
           <p className="mt-4 max-w-[42rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
             No agent here is accused of anything. One party speaking repeatedly is not proof of bad
-            conduct, and Cairn cannot support that claim from what it witnessed. What the record does
+            conduct, and Firsthand cannot support that claim from what it witnessed. What the record does
             support is narrower and more useful: a reputation layer built on counting feedback cannot
             distinguish agreement from repetition, and a reader assuming otherwise is assuming
             something the data does not carry.

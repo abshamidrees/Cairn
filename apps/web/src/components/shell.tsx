@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { CairnMark, type Standing } from "@/components/cairn-mark";
+import { FirsthandMark, type Standing } from "@/components/firsthand-mark";
 import { CommandPalette } from "@/components/command-palette";
 
 /**
@@ -21,8 +21,8 @@ export function Nav({ standing = "default", observations = null }: NavProps) {
     <nav className="border-b border-seam bg-chalk">
       <div className="mx-auto flex h-[60px] max-w-[78rem] items-center justify-between gap-6 px-6">
         <a href="/" className="flex items-center gap-3">
-          <CairnMark standing={standing} width={28} height={28} />
-          <span className="font-display text-[1.25rem] tracking-[-0.02em] text-graphite">Cairn</span>
+          <FirsthandMark standing={standing} width={28} height={28} />
+          <span className="font-display text-[1.25rem] tracking-[-0.02em] text-graphite">Firsthand</span>
         </a>
 
         <ul className="hidden items-center gap-8 md:flex">
@@ -42,7 +42,7 @@ export function Nav({ standing = "default", observations = null }: NavProps) {
           {/* Cmd+K anywhere on the site, because the nav is on every page. */}
           <CommandPalette />
           {/* If the API is down this disappears rather than showing a zero,
-              because a zero would be a claim Cairn cannot support. */}
+              because a zero would be a claim Firsthand cannot support. */}
           {observations !== null ? (
             <span className="hidden font-mono text-[0.6875rem] uppercase tracking-[0.13em] tabular-nums text-scree sm:inline">
               {observations} observations
@@ -83,8 +83,8 @@ export function Footer({ ticker = [] }: { readonly ticker?: readonly TickerEntry
         <div className="flex items-center gap-4">
           {/* Cmd+K anywhere on the site, because the nav is on every page. */}
           <CommandPalette />
-          <CairnMark standing="grounded" width={48} height={48} />
-          <span className="font-display text-[2.5rem] leading-none tracking-[-0.02em]">Cairn</span>
+          <FirsthandMark standing="grounded" width={48} height={48} />
+          <span className="font-display text-[2.5rem] leading-none tracking-[-0.02em]">Firsthand</span>
         </div>
 
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
@@ -123,7 +123,7 @@ export function Footer({ ticker = [] }: { readonly ticker?: readonly TickerEntry
 
       <div className="border-t border-chalk/10">
         <p className="mx-auto max-w-[78rem] px-6 py-4 font-mono text-[0.6875rem] text-scree">
-          © 2026 Cairn · MIT licensed · Built on Sibyl Memory
+          © 2026 Firsthand · MIT licensed · Built on Sibyl Memory
         </p>
       </div>
     </footer>

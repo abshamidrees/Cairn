@@ -18,7 +18,7 @@ export function ExplorerSearch() {
         const reviewer = value.startsWith("rv:") || value.startsWith("@");
         const address = value.replace(/^rv:/, "").replace(/^@/, "").replace(/^cp:base:/, "");
         if (!ADDRESS.test(address)) {
-          setError("Cairn looks up a 40 character address beginning 0x.");
+          setError("Firsthand looks up a 40 character address beginning 0x.");
           return;
         }
         window.location.href = reviewer ? `/explorer/reviewer/${address}` : `/explorer/${address}`;

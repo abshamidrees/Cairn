@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @title Cairn attestations
-/// @notice Publishes a verdict so the record survives outside Cairn.
+/// @title Firsthand attestations
+/// @notice Publishes a verdict so the record survives outside Firsthand.
 ///
 /// ERC-8004 defers verification to a Validation Registry that has no mainnet
 /// deployment, so there is nothing on Base to write a grounded verdict into.
@@ -12,12 +12,12 @@ pragma solidity ^0.8.24;
 /// A verdict is only meaningful with the observations behind it, so `basisHash`
 /// is the keccak of the observation ids the verdict rested on, and `basisCount`
 /// is how many there were. A reader who has the dossier can recompute the hash
-/// and prove the published verdict is the one Cairn actually held. A reader who
+/// and prove the published verdict is the one Firsthand actually held. A reader who
 /// does not can still see that a verdict with zero observations behind it is
 /// worth nothing.
-contract CairnAttestations {
+contract FirsthandAttestations {
     /// @dev Kept neutral on purpose: grounded, thin, suspect, dormant. Nothing
-    /// here calls an agent fraudulent, because Cairn cannot support that claim.
+    /// here calls an agent fraudulent, because Firsthand cannot support that claim.
     event Attested(
         address indexed attestor,
         address indexed counterparty,

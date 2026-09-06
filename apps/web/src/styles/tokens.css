@@ -1,5 +1,5 @@
 /* ============================================================
-   Cairn design tokens, Tailwind v4 CSS-first
+   Firsthand design tokens, Tailwind v4 CSS-first
    The only source of colour, type, spacing, radius, motion.
    Do not introduce a value that is not in this file.
    ============================================================ */
@@ -17,7 +17,7 @@
   --color-basalt:   #101214;   /* the one dark panel: footer, code blocks, explorer shell */
 
   /* ---- Evidence colours -----------------------------------
-     Colour means evidence. If a colour appears where Cairn has
+     Colour means evidence. If a colour appears where Firsthand has
      no observation to point at, it is wrong. There is no fourth. */
   --color-lapis:    #223FA6;   /* GROUNDED · primary action · links */
   --color-lapis-ink:#1A3183;   /* lapis hover / pressed */

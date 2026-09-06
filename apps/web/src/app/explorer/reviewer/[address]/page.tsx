@@ -67,7 +67,7 @@ export default async function ReviewerPage({
       <Frame address={address}>
         <div className="mt-8 rounded-stone border border-seam bg-paper p-8">
           <p className="font-display text-[1.5rem] text-graphite">
-            That is not an address Cairn can look up.
+            That is not an address Firsthand can look up.
           </p>
           <p className="mt-2 max-w-[36rem] text-slate">
             A claimant is a 40 character address beginning 0x.
@@ -87,7 +87,7 @@ export default async function ReviewerPage({
             could not read the record
           </p>
           <p className="mt-3 font-display text-[1.5rem] text-graphite">
-            Cairn could not reach its own memory.
+            Firsthand could not reach its own memory.
           </p>
           <p className="mt-2 max-w-[36rem] text-slate">
             This is a failure to answer, not an answer. Nothing here should be read as a
@@ -103,7 +103,7 @@ export default async function ReviewerPage({
       <Frame address={address}>
         <div className="mt-8 rounded-stone border border-seam bg-paper p-8">
           <p className="font-display text-[1.5rem] text-graphite">
-            No claims. Cairn has never watched this address say anything about anyone.
+            No claims. Firsthand has never watched this address say anything about anyone.
           </p>
           <p className="mt-2 max-w-[40rem] text-slate">
             Claimants enter the record by leaving feedback on an agent in the ERC-8004
@@ -144,7 +144,7 @@ export default async function ReviewerPage({
           <p className="mt-6 max-w-[34rem] text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
             A claim counts as corroborated when a different claimant left a record about the
             same agent. Nobody corroborates themselves, so speaking often is not evidence and
-            Cairn does not treat it as any. Below the threshold a claimant carries the neutral
+            Firsthand does not treat it as any. Below the threshold a claimant carries the neutral
             weight, returned flagged, because a short record is not a bad one.
           </p>
           {weight?.provisional ? (
