@@ -1,0 +1,63 @@
+name: ci
+
+# The gate that matters is the last step. Firsthand's claim is that its memory is
+# load-bearing, and the build goes red the day that stops being true.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install
+        run: pip install -r requirements-dev.txt
+
+      - name: Ruff
+        run: ruff check .
+
+      - name: Mypy
+        # Scope comes from pyproject's files=, which excludes tests on purpose.
+        # Passing a path here would override it and check a different tree.
+        run: mypy
+
+      - name: Tests
+        run: pytest
+
+      # The real database is gitignored, holds addresses indexed from Base, and
+      # could not be rebuilt here anyway because CI has no Base RPC. The fixture
+      # is generated from addresses that are obviously synthetic.
+      - name: Build the fixture dossier
+        run: python tests/fixtures/make_dossier.py --out .ci/memory.db
+
+      - name: Deletion test
+        # --require-basis because the gate on its own only asserts that
+        # memory-off is unusable, which an empty database also satisfies. Without
+        # it a fixture that silently failed to build would still go green.
+        run: |
+          python scripts/deletion_test.py \
+            --agent 0x00000000000000000000000000000000000000aa \
+            --db .ci/memory.db \
+            --require-basis

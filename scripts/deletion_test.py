@@ -82,6 +82,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--chain", default="base", help="chain the counterparty is on")
     parser.add_argument("--db", default=DEFAULT_DB, help="path to memory.db")
     parser.add_argument("--json", action="store_true", help="machine-readable output")
+    parser.add_argument(
+        "--require-basis",
+        action="store_true",
+        help="also fail if the memory-on run found nothing, which CI needs",
+    )
     args = parser.parse_args(argv)
 
     now = datetime.now(UTC)
@@ -95,6 +100,14 @@ def main(argv: list[str] | None = None) -> int:
 
     usable = _is_usable(off)
     passed = not usable
+
+    # On its own the gate only asks whether memory-off is unusable, which an
+    # empty database satisfies without proving anything. Unattended, that is the
+    # difference between a green build and a meaningful one, so CI asks for the
+    # contrast rather than half of it.
+    grounded = bool(on.basis)
+    if args.require_basis and not grounded:
+        passed = False
 
     if args.json:
         print(
@@ -128,6 +141,11 @@ def main(argv: list[str] | None = None) -> int:
     if passed:
         print("  Firsthand's core function is unavailable without the memory layer.  PASS")
         return EXIT_PASS
+
+    if args.require_basis and not grounded:
+        print("  The memory-on run found nothing, so there was no contrast to prove.  FAIL")
+        print(f"  Nothing was read from {args.db}. Check the fixture, not the engine.")
+        return EXIT_FAIL
 
     print("  The memory-off run produced a usable verdict.  FAIL")
     print("  Firsthand answered without reading its record, so the memory is not load-bearing.")
