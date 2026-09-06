@@ -22,9 +22,9 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -44,7 +44,22 @@ jobs:
         run: mypy
 
       - name: Tests
-        run: pytest
+        run: |
+          set -o pipefail
+          pytest -q 2>&1 | tee pytest.log
+
+      # A failing run is read by whoever is not signed in, so what broke belongs
+      # on the summary rather than behind the log viewer.
+      - name: What failed
+        if: failure()
+        run: |
+          {
+            echo '### pytest'
+            echo '```'
+            tail -n 120 pytest.log 2>/dev/null || echo 'no pytest output; an earlier step failed'
+            echo '```'
+            echo "python: $(python --version)"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # The real database is gitignored, holds addresses indexed from Base, and
       # could not be rebuilt here anyway because CI has no Base RPC. The fixture
