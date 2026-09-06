@@ -1,0 +1,37 @@
+app = "firsthand-api"
+primary_region = "sin"
+
+[build]
+
+[env]
+  SIBYL_DB = "/data/memory.db"
+  # Production serves the record and never adds to it. Without this the dossier
+  # endpoint writes a recent-lookups list on every read, against a database with
+  # under 250 KB of headroom.
+  FIRSTHAND_READ_ONLY = "1"
+  PORT = "8080"
+
+[[mounts]]
+  source = "firsthand_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # A judge on another continent should not pay a machine start. The record is
+  # 5 MB and the machine is the smallest Fly sells, so leaving it up costs less
+  # than a cold start costs the demo.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/v1/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

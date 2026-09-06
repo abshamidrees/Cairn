@@ -1,0 +1,11 @@
+# This repo is built on Windows and runs in a Linux container. core.autocrlf
+# would hand a fresh clone CRLF line endings, and a shell script whose shebang
+# ends in \r fails inside Docker with a "not found" that names the interpreter
+# that plainly exists. Pin the files the image executes to LF.
+*.sh text eol=lf
+Dockerfile text eol=lf
+docker-entrypoint.sh text eol=lf
+
+# Binary, so git never tries to normalise them.
+*.png binary
+*.db binary

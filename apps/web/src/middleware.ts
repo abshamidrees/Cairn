@@ -5,9 +5,14 @@ const SUBDOMAIN_ROOT: Record<string, string> = {
   docs: "/docs",
 };
 
+// Empty until a domain is pointed at the deployment, which leaves every surface
+// on one origin as a path. Mirrors useSubdomains() in lib/host.ts.
+const ROOT_DOMAIN = process.env["NEXT_PUBLIC_ROOT_DOMAIN"] ?? "";
+
 export function middleware(req: NextRequest) {
+  if (!ROOT_DOMAIN) return NextResponse.next();
   const host = req.headers.get("host")?.split(":")[0] ?? "";
-  const sub = host.endsWith("usefirsthand.xyz") ? host.split(".")[0] : null;
+  const sub = host.endsWith(ROOT_DOMAIN) ? host.split(".")[0] : null;
   const root = sub ? SUBDOMAIN_ROOT[sub] : undefined;
   if (!root) return NextResponse.next();
 

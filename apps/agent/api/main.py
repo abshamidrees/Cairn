@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Any, Literal
@@ -36,6 +37,13 @@ from apps.agent.memory.store import (
 
 DEFAULT_DB = os.environ.get("SIBYL_DB") or "data/memory.db"
 
+#: Production serves the indexed record and never adds to it. The free tier's
+#: cap is 5,242,880 bytes and the shipped database sits inside 250 KB of it, so
+#: a convenience write is the one thing that could turn a working read into a
+#: 500 while a judge is watching. Set FIRSTHAND_READ_ONLY=1 to refuse writes
+#: outright rather than catching a cap error after the fact.
+READ_ONLY = os.environ.get("FIRSTHAND_READ_ONLY") == "1"
+
 #: Bottom to top, the same order the mark stacks its stones in.
 TIERS = ("ARCHIVE", "REFERENCE", "COLD", "WARM", "HOT")
 
@@ -48,10 +56,26 @@ app = FastAPI(
 )
 
 # The web app is served from a different origin in development and from the
-# usefirsthand.xyz subdomains in production.
+# usefirsthand.xyz subdomains once that domain is pointed here. Until then it is
+# served from a platform domain that is not known when this file is written, so
+# FIRSTHAND_WEB_ORIGIN carries it in, comma separated. A blocked origin fails
+# silently in the browser: the Stack simply never loads, and the page still
+# scores well while showing nothing. That has happened once already, so the
+# deployed origin is configuration rather than something to remember to edit.
+_ORIGIN_PATTERNS = [
+    r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+    r"https://([a-z0-9-]+\.)?usefirsthand\.xyz",
+    *(
+        re.escape(origin.strip())
+        for origin in os.environ.get("FIRSTHAND_WEB_ORIGIN", "").split(",")
+        if origin.strip()
+    ),
+]
+ALLOWED_ORIGIN_REGEX = "|".join(_ORIGIN_PATTERNS)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?|https://([a-z]+\.)?usefirsthand\.xyz",
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_methods=["GET"],
     allow_headers=["*"],
 )
@@ -371,7 +395,7 @@ def dossier(
     """Everything Firsthand holds about one counterparty, arranged by tier."""
     with _store_for(memory) as store:
         payload = _dossier_payload(store, chain, address, memory)
-        if memory != "off":
+        if memory != "off" and not READ_ONLY:
             _remember_lookup(store, payload["counterparty"])
         return payload
 

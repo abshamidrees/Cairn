@@ -1,0 +1,24 @@
+# Everything the API does not need at runtime. data/ is the exception: the
+# Dockerfile copies data/memory.db in deliberately as the volume's seed.
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.git/
+.github/
+
+apps/web/
+packages/
+brand/
+docs/
+refs/
+scripts/
+tests/
+
+data/indexer.db
+*.md
+.env
+.env.local
+.env.example
