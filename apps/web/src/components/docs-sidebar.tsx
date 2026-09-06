@@ -9,7 +9,13 @@ export function DocsSidebar() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Documentation" className="lg:sticky lg:top-8 lg:self-start">
+    <nav
+      aria-label="Documentation"
+      // Below lg the grid is one column, so source order decides what a phone
+      // meets first. Sixteen links ahead of the heading meant a full screen of
+      // scrolling before the page began; the index reads better as a footer.
+      className="order-2 lg:order-1 lg:sticky lg:top-8 lg:self-start"
+    >
       {DOCS.map((group) => (
         <div key={group.label} className="mb-8">
           <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">

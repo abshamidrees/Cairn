@@ -14,7 +14,7 @@ export default function DocsLayout({ children }: { readonly children: ReactNode 
       <Nav />
       <div className="mx-auto grid max-w-[78rem] gap-10 px-6 py-12 lg:grid-cols-[13rem_1fr_12rem]">
         <DocsSidebar />
-        <main className="min-w-0">{children}</main>
+        <main className="order-1 min-w-0 lg:order-2">{children}</main>
         <PageToc />
       </div>
     </>

@@ -17,7 +17,12 @@ export function PageToc() {
   if (headings.length === 0) return <div aria-hidden />;
 
   return (
-    <nav aria-label="On this page" className="hidden lg:sticky lg:top-8 lg:block lg:self-start">
+    <nav
+      aria-label="On this page"
+      // Explicit, because the other two columns set an order and an unset one
+      // would sort ahead of both.
+      className="hidden lg:order-3 lg:sticky lg:top-8 lg:block lg:self-start"
+    >
       <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
         On this page
       </p>
