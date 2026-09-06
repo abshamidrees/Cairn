@@ -27,7 +27,7 @@ from typing import Any
 from web3 import Web3
 
 from apps.agent.judge.verdict import Verdict
-from apps.agent.memory.store import Store, counterparty_tenant
+from apps.agent.memory.store import MemoryCapReachedError, Store, counterparty_tenant
 
 CONTRACT = Path(__file__).resolve().parent.parent.parent.parent / (
     "packages/chain/contracts/FirsthandAttestations.sol"
@@ -42,6 +42,20 @@ BPS = 10_000
 
 class AttestationError(RuntimeError):
     """The attestation could not be published, or would have been meaningless."""
+
+
+class AttestationRecordError(AttestationError):
+    """Published on chain, but the dossier could not be updated to say so.
+
+    Carries the hash, because at this point the transaction is mined and paid
+    for and the hash is the only thing the money bought. Raising a bare error
+    here once discarded a landed attestation and left the chain as the only
+    place it existed.
+    """
+
+    def __init__(self, message: str, *, tx_hash: str) -> None:
+        super().__init__(message)
+        self.tx_hash = tx_hash
 
 
 @dataclass(frozen=True)
@@ -207,7 +221,10 @@ class Attestor:
         published = tx_hash.hex()
 
         if store is not None:
-            record_attestation(store, verdict, published, self._address)
+            try:
+                record_attestation(store, verdict, published, self._address)
+            except MemoryCapReachedError as exc:
+                raise AttestationRecordError(str(exc), tx_hash=published) from exc
         return published
 
 

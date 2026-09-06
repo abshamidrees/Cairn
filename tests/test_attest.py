@@ -7,13 +7,18 @@ publishing a judgment about a real third party that cannot be taken back.
 
 from __future__ import annotations
 
+from contextlib import AbstractContextManager, nullcontext
+
 import pytest
 from eth_utils import keccak
 
 from apps.agent.judge.verdict import BasisItem, ContradictionRef, Verdict
+from apps.agent.memory.store import MemoryCapReachedError
 from apps.agent.publish.attest import (
     BPS,
     AttestationError,
+    AttestationRecordError,
+    Attestor,
     basis_hash,
     compile_contract,
     encode,
@@ -151,3 +156,90 @@ def test_the_contract_refuses_the_same_thing_the_encoder_does() -> None:
     text = CONTRACT.read_text(encoding="utf-8")
     assert "EmptyBasisForGroundedVerdict" in text
     assert 'keccak256("grounded")' in text
+
+
+# ---- a landed transaction is never lost to a bookkeeping failure ---------
+
+
+class _FullStore:
+    """A store whose every write is refused because the database is full."""
+
+    def use(self, tenant_id: str) -> AbstractContextManager[None]:
+        return nullcontext()
+
+    def assert_fact(self, *args: object, **kwargs: object) -> None:
+        raise MemoryCapReachedError("at the 5 MB free-tier cap")
+
+    def put_reference(self, *args: object, **kwargs: object) -> None:
+        raise MemoryCapReachedError("at the 5 MB free-tier cap")
+
+
+class _MinedTx:
+    """Just enough web3 to mine one transaction and hand back its hash."""
+
+    def __init__(self, digest: bytes) -> None:
+        self._digest = digest
+        self.eth = self
+
+    def contract(self, **kwargs: object) -> _MinedTx:
+        return self
+
+    @property
+    def functions(self) -> _MinedTx:
+        return self
+
+    def attest(self, *args: object) -> _MinedTx:
+        return self
+
+    def build_transaction(self, tx: dict[str, object]) -> dict[str, object]:
+        return tx
+
+    def get_transaction_count(self, address: str) -> int:
+        return 0
+
+    def send_raw_transaction(self, raw: object) -> bytes:
+        return self._digest
+
+    def wait_for_transaction_receipt(self, tx_hash: bytes, timeout: int = 0) -> dict[str, int]:
+        return {"status": 1}
+
+
+class _Signed:
+    raw_transaction = b""
+
+
+class _Account:
+    address = "0x0000000000000000000000000000000000000001"
+
+    def sign_transaction(self, tx: dict[str, object]) -> _Signed:
+        return _Signed()
+
+
+def _attestor_that_mines(digest: bytes) -> Attestor:
+    """An Attestor wired to fakes, so nothing compiles, signs or spends."""
+    a = object.__new__(Attestor)
+    a._w3 = _MinedTx(digest)  # type: ignore[attr-defined]
+    a._account = _Account()  # type: ignore[attr-defined]
+    a._artifact = {"abi": []}  # type: ignore[attr-defined]
+    a._address = "0x000000000000000000000000000000000000dEaD"  # type: ignore[attr-defined]
+    return a
+
+
+def test_a_full_database_does_not_discard_a_published_transaction() -> None:
+    """The money is already spent. The hash is the only thing it bought.
+
+    This is the failure that actually happened: the dossier write raised, the
+    return statement never ran, and a mined attestation existed only on chain.
+    """
+    digest = bytes.fromhex("65407e03b1ad643b2e208762757e4294e5aab66be1d82dacdeb01d300affd9b6")
+    attestor = _attestor_that_mines(digest)
+
+    with pytest.raises(AttestationRecordError) as caught:
+        attestor.publish(verdict(), store=_FullStore())  # type: ignore[arg-type]
+
+    assert caught.value.tx_hash.removeprefix("0x") == digest.hex()
+
+
+def test_the_record_error_is_catchable_as_an_attestation_error() -> None:
+    """So an older caller still handles it, rather than seeing a raw traceback."""
+    assert issubclass(AttestationRecordError, AttestationError)

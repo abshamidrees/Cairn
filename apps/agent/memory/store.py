@@ -70,6 +70,22 @@ class MemoryCapReachedError(RuntimeError):
     """
 
 
+@contextmanager
+def _cap_guarded() -> Iterator[None]:
+    """Translate the SDK's cap error at the boundary, on every write.
+
+    Three write paths did this individually and the rest did not, so a full
+    database raised the SDK's own exception straight through a class whose
+    entire purpose is that callers never see it. That is not a tidiness
+    complaint: it escaped mid-publish and discarded a transaction that had
+    already been paid for and mined.
+    """
+    try:
+        yield
+    except CapExceededError as exc:
+        raise MemoryCapReachedError(str(exc)) from exc
+
+
 # What a durable fact's value may be. Narrower than Any, and it is what the
 # journal can actually round-trip.
 type JsonValue = str | int | float | bool | list[JsonValue] | dict[str, JsonValue] | None
@@ -242,14 +258,12 @@ class MemoryStore:
         and journals the promotion as its own event, so the tier migration is
         itself part of the record.
         """
-        try:
+        with _cap_guarded():
             event_id: Any = self._m.write_event(
                 evaluated={"observation": obs.as_payload()},
                 acted={"tier": "COLD", "wrote": "journal"},
                 forward=[],
             )
-        except CapExceededError as exc:
-            raise MemoryCapReachedError(str(exc)) from exc
         promotion = self._promote_if_due(obs)
         return Written(observation_id=str(event_id), promotion=promotion)
 
@@ -296,28 +310,30 @@ class MemoryStore:
         ids = tuple(str(row["id"]) for row in fresh)
         already = self.fact(BEHAVIOUR, obs.pattern)
 
-        self._m.set_entity(
-            BEHAVIOUR,
-            obs.pattern,
-            {
-                "value": obs.pattern,
-                "kind": obs.kind,
-                "n": len(fresh),
-                "first_seen": first_seen,
-                "last_seen": last_seen,
-                "observation_ids": list(ids),
-            },
-            status="active",
-        )
+        with _cap_guarded():
+            self._m.set_entity(
+                BEHAVIOUR,
+                obs.pattern,
+                {
+                    "value": obs.pattern,
+                    "kind": obs.kind,
+                    "n": len(fresh),
+                    "first_seen": first_seen,
+                    "last_seen": last_seen,
+                    "observation_ids": list(ids),
+                },
+                status="active",
+            )
 
         if already is None:
             # The promotion is an event in its own right, so a judge can match
             # this row to the moment the pattern stopped being a coincidence.
-            self._m.write_event(
-                evaluated={"promotion": {"pattern": obs.pattern, "n": len(fresh)}},
-                acted={"tier": "WARM", "promoted": obs.pattern, "from": "COLD"},
-                forward=[],
-            )
+            with _cap_guarded():
+                self._m.write_event(
+                    evaluated={"promotion": {"pattern": obs.pattern, "n": len(fresh)}},
+                    acted={"tier": "WARM", "promoted": obs.pattern, "from": "COLD"},
+                    forward=[],
+                )
 
         return Promotion(
             pattern=obs.pattern,
@@ -446,22 +462,24 @@ class MemoryStore:
                 category=category, name=name, old=old, new=value, observation_id=observation_id
             )
 
-        self._m.set_entity(category, name, {"value": value}, status="active")
+        with _cap_guarded():
+            self._m.set_entity(category, name, {"value": value}, status="active")
 
         if contradiction is not None:
-            self._m.write_event(
-                evaluated={
-                    "contradiction": {
-                        "category": category,
-                        "name": name,
-                        "old": old,
-                        "new": value,
-                        "observation_id": observation_id,
-                    }
-                },
-                acted={"tier": "WARM", "overwrote": name},
-                forward=[{"corroborate": name}],
-            )
+            with _cap_guarded():
+                self._m.write_event(
+                    evaluated={
+                        "contradiction": {
+                            "category": category,
+                            "name": name,
+                            "old": old,
+                            "new": value,
+                            "observation_id": observation_id,
+                        }
+                    },
+                    acted={"tier": "WARM", "overwrote": name},
+                    forward=[{"corroborate": name}],
+                )
         return contradiction
 
     # ---- ARCHIVE, demotion by decay --------------------------------------
@@ -486,12 +504,14 @@ class MemoryStore:
 
             reason = "evidence aged out"
             name = str(entity["name"])
-            self._m.write_event(
-                evaluated={"archival": {"category": BEHAVIOUR, "name": name, "body": body}},
-                acted={"tier": "ARCHIVE", "archived": name, "reason": reason},
-                forward=[],
-            )
-            self._m.archive_entity(BEHAVIOUR, name, reason=reason)
+            with _cap_guarded():
+                self._m.write_event(
+                    evaluated={"archival": {"category": BEHAVIOUR, "name": name, "body": body}},
+                    acted={"tier": "ARCHIVE", "archived": name, "reason": reason},
+                    forward=[],
+                )
+            with _cap_guarded():
+                self._m.archive_entity(BEHAVIOUR, name, reason=reason)
             retired.append(
                 Archived(category=BEHAVIOUR, name=name, reason=reason, last_seen=last_seen)
             )
@@ -500,10 +520,8 @@ class MemoryStore:
     # ---- REFERENCE -------------------------------------------------------
 
     def put_reference(self, key: str, body: Mapping[str, Any]) -> None:
-        try:
+        with _cap_guarded():
             self._m.set_reference(key, dict(body))
-        except CapExceededError as exc:
-            raise MemoryCapReachedError(str(exc)) from exc
 
     def reference(self, key: str) -> dict[str, Any] | None:
         held = self._m.get_reference(key)
@@ -521,10 +539,8 @@ class MemoryStore:
 
     def put_verdict(self, body: Mapping[str, Any]) -> None:
         """Rewritten in place. The journal keeps the history, this does not."""
-        try:
+        with _cap_guarded():
             self._m.set_state("verdict", dict(body))
-        except CapExceededError as exc:
-            raise MemoryCapReachedError(str(exc)) from exc
 
     def verdict(self) -> dict[str, Any] | None:
         return self._state_body("verdict")
@@ -541,11 +557,12 @@ class MemoryStore:
 
     def hand_forward(self, items: Sequence[Mapping[str, Any]]) -> str:
         """Leave work for the next session to pick up."""
-        event_id: Any = self._m.write_event(
-            evaluated={"handoff": {"n": len(items)}},
-            acted={"tier": "COLD", "wrote": "forward"},
-            forward=[dict(item) for item in items],
-        )
+        with _cap_guarded():
+            event_id: Any = self._m.write_event(
+                evaluated={"handoff": {"n": len(items)}},
+                acted={"tier": "COLD", "wrote": "forward"},
+                forward=[dict(item) for item in items],
+            )
         return str(event_id)
 
     def drain_forward(self) -> list[dict[str, Any]]:
@@ -570,7 +587,8 @@ class MemoryStore:
                 pending.extend(item for item in forward if isinstance(item, dict))
 
         if newest is not None:
-            self._m.set_state(FORWARD_CURSOR, {"ts": newest})
+            with _cap_guarded():
+                self._m.set_state(FORWARD_CURSOR, {"ts": newest})
         return pending
 
 

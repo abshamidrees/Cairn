@@ -26,7 +26,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from apps.agent.env import load as load_env
 from apps.agent.judge.verdict import evaluate
 from apps.agent.memory.store import MemoryStore
-from apps.agent.publish.attest import AttestationError, attestor_from_env, encode
+from apps.agent.publish.attest import (
+    AttestationError,
+    AttestationRecordError,
+    attestor_from_env,
+    encode,
+)
 
 # Secrets live in .env.local; the scripts read os.environ. Bridge the two
 # before anything asks for a key.
@@ -87,6 +92,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  verdict        {verdict.standing} confidence={verdict.confidence}")
         print(f"  basis          {len(verdict.basis)} observations")
         tx_hash = attestor.publish(verdict, store=store)
+    except AttestationRecordError as exc:
+        # Caught before AttestationError, which it subclasses. This one already
+        # spent the money: print the hash exactly as the success path does, or
+        # the only copy of it leaves with the traceback.
+        print(f"  published      https://basescan.org/tx/0x{exc.tx_hash.removeprefix('0x')}")
+        print(f"  not recorded   {exc}")
+        print("  the attestation is on chain. Only the dossier is behind.")
+        return 1
     except AttestationError as exc:
         print(f"  refused: {exc}")
         return 1
