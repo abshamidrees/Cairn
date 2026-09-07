@@ -6,7 +6,7 @@
     "reputation_registry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
     "blocks": "50763849-50783850",
     "reproduce": [
-      "python -m apps.agent.observe.base --bootstrap",
+      "python -m apps.agent.observe.base --from-block 50763849 --to-block 50783850",
       "python scripts/scan.py --db data/memory.db"
     ],
     "note": "Aggregate only. No agent or claimant is named, ranked or accused. This is a finding about the registry's design."

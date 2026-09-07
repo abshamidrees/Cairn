@@ -44,7 +44,15 @@ refs/
 *.db-shm
 *.sqlite*
 .sibyl-memory/
-data/
+# The working database, its journals, and the indexer cursor. Git cannot
+# re-include a file under an excluded directory, so this excludes the contents
+# rather than the directory and lets the deployment seed back in below.
+data/*
+# The one exception. Render and any other git-sourced build has no access to a
+# gitignored file, so the record production serves has to be in the repository.
+# Compressed: 1.1 MB against 4.5 MB, and it is a snapshot, not the live file.
+# Refresh it with:  gzip -9 -c data/memory.db > data/memory.db.gz
+!data/memory.db.gz
 memory-snapshots/
 
 # ---- Python ---------------------------------------------------------

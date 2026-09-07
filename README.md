@@ -282,19 +282,30 @@ tests/            113 tests
 
 ## Run it locally
 
-Requires Python 3.12+, Node 18+, and a Base RPC URL.
+Requires Python 3.12+ and Node 18+. Only the indexing step needs a Base RPC, and it is optional.
 
 ```bash
 python -m venv .venv && .venv/Scripts/activate
 pip install -r requirements.txt
 
 python scripts/verify_memory.py                    # proves the store works offline
-python -m apps.agent.observe.base --bootstrap      # index the counterparty set
+python scripts/build_fixture.py --out .ci/memory.db
+python scripts/deletion_test.py   --agent 0x00000000000000000000000000000000000000aa   --db .ci/memory.db --require-basis                # the gate, offline, ~3 seconds
+```
+
+That reaches the claim the project rests on without touching a chain. To index the real set that the
+published figures come from, name its range, then judge and serve it:
+
+```bash
+python -m apps.agent.observe.base --from-block 50763849 --to-block 50783850
 python scripts/summarise.py --db data/memory.db    # judge it, and record what is held
 python -m uvicorn apps.agent.api.main:app --port 8000
 
 cd apps/web && npm install && npm run dev          # http://localhost:3000
 ```
+
+`--bootstrap` scans from the registry's deployment block instead, and on the free tier stops at the
+cap partway through. It is a different set, not this one.
 
 `scripts/verify_memory.py` blocks outbound sockets before it starts, so "works offline with no
 credentials" is proven rather than asserted.

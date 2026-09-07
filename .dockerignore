@@ -1,5 +1,5 @@
 # Everything the API does not need at runtime. data/ is the exception: the
-# Dockerfile copies data/memory.db in deliberately as the volume's seed.
+# Dockerfile copies data/memory.db.gz in deliberately as the seed.
 .venv/
 __pycache__/
 *.pyc

@@ -36,6 +36,15 @@ CHAIN_ID = 8453
 IDENTITY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
 REPUTATION = "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63"
 
+#: The range these figures were produced from. The published block span, the
+#: scanned count and the reproduce command are all derived from this pair, so
+#: they cannot drift apart again. They had: the command named `--bootstrap`,
+#: which starts at the registry's deployment block instead and, on the free
+#: tier, stops at the cap thousands of blocks short of this range. Anyone who
+#: ran it got a different set and no explanation for why.
+FROM_BLOCK = 50_763_849
+TO_BLOCK = 50_783_850
+
 
 def _address_of(tenant: str) -> str:
     return tenant.split(":")[-1]
@@ -82,9 +91,10 @@ def build(store: MemoryStore) -> dict[str, Any]:
             "chain_id": CHAIN_ID,
             "identity_registry": IDENTITY,
             "reputation_registry": REPUTATION,
-            "blocks": "50763849-50783850",
+            "blocks": f"{FROM_BLOCK}-{TO_BLOCK}",
             "reproduce": [
-                "python -m apps.agent.observe.base --bootstrap",
+                f"python -m apps.agent.observe.base --from-block {FROM_BLOCK}"
+                f" --to-block {TO_BLOCK}",
                 "python scripts/scan.py --db data/memory.db",
             ],
             "note": (
@@ -93,7 +103,7 @@ def build(store: MemoryStore) -> dict[str, Any]:
             ),
         },
         "indexed": {
-            "blocks_scanned": 20002,
+            "blocks_scanned": TO_BLOCK - FROM_BLOCK + 1,
             "agents_seen": 107,
             "counterparty_dossiers": len(counterparties),
             "claimant_dossiers": len(reviewers),
