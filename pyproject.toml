@@ -46,8 +46,6 @@ ignore = [
 "apps/agent/observe/base.py" = ["T20"]
 # Asserting is what a test does.
 "tests/*" = ["S101"]
-# A CLI that happens to live beside the tests it feeds. Printing is its output.
-"tests/fixtures/make_dossier.py" = ["S101", "T20"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "packages", "scripts", "tests"]

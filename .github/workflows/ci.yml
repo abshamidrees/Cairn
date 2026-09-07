@@ -70,7 +70,7 @@ jobs:
       # could not be rebuilt here anyway because CI has no Base RPC. The fixture
       # is generated from addresses that are obviously synthetic.
       - name: Build the fixture dossier
-        run: python tests/fixtures/make_dossier.py --out .ci/memory.db
+        run: python scripts/build_fixture.py --out .ci/memory.db
 
       - name: Deletion test
         # --require-basis because the gate on its own only asserts that

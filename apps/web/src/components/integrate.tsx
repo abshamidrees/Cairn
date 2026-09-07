@@ -3,14 +3,14 @@
 import { useState } from "react";
 
 /**
- * The install line and the four lines that use it.
+ * The four lines that decide whether to pay.
+ *
+ * There is no install line because there is no published package: the API is
+ * the integration surface, and the CLI tab calls it exactly as written.
  *
  * Both tabs show the same decision: ask Firsthand what it has witnessed, and refuse
- * to fund if the answer is not grounded. Copying is a state change, not a
- * motion moment: the label swaps and nothing moves.
+ * to fund if the answer is not grounded.
  */
-
-const INSTALL = "pip install firsthand";
 
 const SAMPLES: readonly { readonly label: string; readonly code: string }[] = [
   {
@@ -29,38 +29,12 @@ escrow.fund(job_id)`,
   },
 ];
 
-function CopyButton({ value }: { readonly value: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        void navigator.clipboard.writeText(value).then(() => {
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 1200);
-        });
-      }}
-      className="rounded-stone border border-chalk/20 px-2 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-scree transition-colors duration-[var(--dur-fast)] hover:text-chalk"
-    >
-      {copied ? "copied" : "copy"}
-    </button>
-  );
-}
-
 export function Integrate() {
   const [active, setActive] = useState(0);
   const sample = SAMPLES[active] ?? SAMPLES[0];
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4 rounded-stone bg-basalt px-4 py-3">
-        <code className="font-mono text-[0.8125rem] text-chalk">
-          <span className="select-none text-scree">$ </span>
-          {INSTALL}
-        </code>
-        <CopyButton value={INSTALL} />
-      </div>
-
       <div className="rounded-stone bg-basalt">
         <div
           role="tablist"

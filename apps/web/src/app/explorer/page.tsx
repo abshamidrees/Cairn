@@ -31,7 +31,21 @@ export default async function ExplorerPage() {
 
         <div className="mt-10 max-w-[40rem]">
           <ExplorerSearch />
+          {/* A first-time reader has no address to type, and an empty search is a
+              dead end on the one page that has to demonstrate the product. This
+              is the counterparty three separate claimants spoke about, which is
+              the only grounded dossier in the indexed set. */}
           <p className="mt-3 font-mono text-[0.6875rem] text-slate">
+            Nothing to hand? Open{" "}
+            <a
+              href="/explorer/0x01f90369170c917a2c0e9d26d54c6a3a400984d3"
+              className="text-lapis underline underline-offset-2 hover:text-lapis-ink"
+            >
+              0x01f90369…84d3
+            </a>
+            , the one counterparty in the indexed set with a grounded record.
+          </p>
+          <p className="mt-2 font-mono text-[0.6875rem] text-slate">
             Press Ctrl+K, or Cmd+K on a Mac, anywhere on the site. Prefix rv: to look up a claimant.
           </p>
         </div>

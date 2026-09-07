@@ -1,6 +1,6 @@
 """Build a synthetic dossier for the deletion test to run against in CI.
 
-    python tests/fixtures/make_dossier.py --out .ci/memory.db
+    python scripts/build_fixture.py --out .ci/memory.db
 
 The real database is gitignored and holds addresses indexed from Base. None of
 that belongs in the repository: it is third-party data, it is 4.5 MB, and CI has
@@ -20,7 +20,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from apps.agent.memory.store import MemoryStore, Observation, counterparty_tenant
 

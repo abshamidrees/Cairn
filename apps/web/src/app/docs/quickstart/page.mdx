@@ -3,6 +3,11 @@
 **Firsthand runs entirely on your machine.** The memory database is local, needs no credentials, and
 makes no network call to read, write or search.
 
+This page gets you to the deletion test, which is the claim the whole project rests on: remove the
+memory layer and the product stops working. Everything here runs offline in a few seconds. Indexing
+the real Base set is a separate, optional step at the bottom, because it takes minutes and needs a
+chain connection.
+
 ## Install
 
 ```
@@ -22,16 +27,63 @@ python scripts/verify_memory.py
 It exercises all five tiers and tenant isolation against a fresh database, and exits non-zero if any
 of them behaves differently from what the adapter assumes.
 
-## Index a counterparty set
+## Build a dossier to test against
+
+The indexed database is not in the repository: it holds addresses read from Base, and it is 4.5 MB.
+This writes a small one from addresses that are obviously synthetic.
 
 ```
-python -m apps.agent.observe.base --bootstrap
+python scripts/build_fixture.py --out .ci/memory.db
 ```
 
-Cursor-based and resumable. An observation is keyed by a hash of the raw log, so a second run over
-the same block range writes nothing new.
+Three independent claimants speaking about one counterparty, which is the smallest record that
+reaches `grounded`. That matters for the next step: a dossier that evaluated to `thin` would pass the
+deletion test while proving nothing.
 
-## Judge it, then serve it
+## Run the deletion test
+
+```
+python scripts/deletion_test.py \
+  --agent 0x00000000000000000000000000000000000000aa \
+  --db .ci/memory.db \
+  --require-basis
+```
+
+```
+  memory ON      standing=grounded  confidence=0.90  basis=4  observations
+  memory OFF     standing=thin      confidence=-     basis=0  observations
+                 ↳ verdict engine returned NO_BASIS
+
+  Firsthand's core function is unavailable without the memory layer.  PASS
+```
+
+The same lookup twice, with the memory adapter swapped for one whose every read returns empty. It
+exits non-zero if the memory-off run ever produces a usable verdict, which is why it runs in CI.
+`--require-basis` also fails the run if the memory-on side found nothing, so an empty database cannot
+pass it by having nothing to lose.
+
+From a clean clone, the two steps above take under three seconds.
+
+## Optional: index the real Base set
+
+Everything above works offline. This does not: it reads Base and takes several minutes.
+`BASE_RPC_URL` is read from `.env.local` if you have one, and falls back to the public endpoint if
+you do not.
+
+To reproduce the set the published figures come from, name its range:
+
+```
+python -m apps.agent.observe.base --from-block 50763849 --to-block 50783850
+```
+
+`--bootstrap` is the other option, and it answers a different question. It starts at the registry's
+deployment block, 41,663,783, and on the free tier it stops at the cap partway through: a clean run
+here scanned 20,000 blocks, wrote 321 observations across 4 counterparty dossiers and reported
+`stopped_at_cap True`. That is the earliest slice of the registry, not the set described above, and
+it is worth seeing for what the cap does rather than mistaking it for a failed reproduction.
+
+Either way it is cursor-based and resumable. An observation is keyed by a hash of the raw log, so a
+second run over the same block range writes nothing new. Then judge it and serve it:
 
 ```
 python scripts/summarise.py --db data/memory.db
@@ -42,3 +94,5 @@ python -m uvicorn apps.agent.api.main:app --port 8000
 
 The free tier caps the database at 5,242,880 bytes and the SDK enforces it. The indexed set is
 scoped to fit rather than truncated quietly. If a run stops at the cap it says so and stops cleanly.
+The cap counts the database's pages, not the bytes on disk, so a file that has churned can sit over
+the line while looking under it. `VACUUM` reclaims the difference.

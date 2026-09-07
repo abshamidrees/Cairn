@@ -263,7 +263,7 @@ function Standing({ stats }: { readonly stats: Stats }) {
 
 /* ---- 06 The one dark panel ----------------------------------------------- */
 
-const DELETION_OUTPUT = `  memory ON      standing=grounded  confidence=0.84  basis=3  observations
+const DELETION_OUTPUT = `  memory ON      standing=grounded  confidence=0.83  basis=3  observations
   memory OFF     standing=thin      confidence=-     basis=0  observations
                  ↳ verdict engine returned NO_BASIS
 
@@ -388,7 +388,7 @@ export default async function LandingPage() {
             </a>
           </div>
           <p className="mt-6 font-mono text-[0.6875rem] text-scree">
-            Free while in beta · no wallet connection required to read
+            No wallet connection required to read
           </p>
         </section>
       </main>

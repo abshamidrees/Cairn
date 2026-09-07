@@ -9,9 +9,17 @@ a record Firsthand witnessed itself, never a rating somebody self-reported.
 
 [Run it locally](#run-it-locally) · [Methodology](#the-methodology-is-generated-from-the-engine) · [Where memory is load-bearing](#where-memory-is-load-bearing) · [What is real and what is not](#what-is-real-and-what-is-not)
 
+**Live:** [firsthand-iota.vercel.app](https://firsthand-iota.vercel.app) ·
+[the attestation on Base](https://basescan.org/tx/0x65407e03b1ad643b2e208762757e4294e5aab66be1d82dacdeb01d300affd9b6) ·
+[the ACP agent](https://app.virtuals.io/acp/agent/01a06098-ef45-7e55-8ad6-21970291edb3)
+
+Those three are checkable without us. The attestation is a mainnet write whose event decodes to the
+same fields the dry run printed before it was sent, and the ACP listing is Virtuals' page, not ours.
+
 > Submission for the Sibyl Labs Memory Hackathon, Sep 1-10 2026. The web app is deployed; the read
-> API still runs locally, so the deployed site shows only the sections it can source. There is no
-> demo video yet. Everything below runs from a clean clone today.
+> API still runs on a laptop, so the deployed site renders only the sections it can source and the
+> dossier views say so rather than guessing. There is no demo video yet. Everything below runs from
+> a clean clone today.
 
 ---
 
@@ -72,7 +80,7 @@ python scripts/deletion_test.py --agent 0x01f90369170c917a2c0e9d26d54c6a3a400984
 Real output against the indexed set:
 
 ```
-  memory ON      standing=grounded  confidence=0.84  basis=3  observations
+  memory ON      standing=grounded  confidence=0.83  basis=3  observations
   memory OFF     standing=thin      confidence=-     basis=0  observations
                  ↳ verdict engine returned NO_BASIS
 
@@ -95,7 +103,7 @@ Volunteering the limits is what makes the rest credible.
 | Deterministic verdict, no model in the decision path | **Real.** [`verdict.py`](apps/agent/judge/verdict.py), 27 tests. No LLM is called anywhere in this repo; [`tests/test_boundary.py`](tests/test_boundary.py) parses the judge package to keep it that way |
 | Base registry reads | **Real.** 20,002 blocks, 364 observations, 107 agents. The feedback event ABI is unpublished and was derived from the wire, decoding 549 of 549 live logs |
 | Reviewer weighting | **Real over the indexed set.** 13 of 14 claimants are below the corroboration threshold, so their weights are provisional and the API returns them flagged |
-| ACP agent and offering | **Real and live.** Registered on Base 8453 with a visible offering. **No job has been run**: that needs USDC in the agent wallet |
+| ACP agent and offering | **Real and live**, and [publicly listed](https://app.virtuals.io/acp/agent/01a06098-ef45-7e55-8ad6-21970291edb3) without a login. **No job has been run.** A job is created and funded by a buyer, not by the provider, so this needs a second agent rather than a balance: the wallet already holds 1.90 USDC against a 0.01 price. The listing says the same thing, and it is not our page |
 | ACP Evaluator role | **Code complete and tested, never exercised.** [`observe/acp.py`](apps/agent/observe/acp.py), 13 tests against a fake CLI runner |
 | Base attestation write | **Landed.** Contract [`0xaB4eB81c`](https://basescan.org/address/0xaB4eB81cd12957Aa56744D02a3a842BEC5AAEE4B), attestation [`0x65407e03`](https://basescan.org/tx/0x65407e03b1ad643b2e208762757e4294e5aab66be1d82dacdeb01d300affd9b6). The published fields match what `--dry-run` printed beforehand, and the event can be decoded from the chain to check it |
 | Indexed coverage | **Scoped, not truncated.** 20,002 blocks, not the full ERC-8004 set, because the free tier caps the database at 5,242,880 bytes. Stated here rather than hidden |
@@ -340,11 +348,18 @@ Any agent can request removal from the indexed set, and it is honoured.
 
 Per the hackathon rules, everything that existed before the build window opened on Sep 1 2026:
 
-- **Brand and design system**: the name, marks, colour tokens, type choices and the build brief were
-  produced Aug 21-31 2026, before the window. The marks and tokens are committed under `brand/` and
-  `apps/web/src/styles/tokens.css`. The brief itself is not published.
-- **Accounts**: the ACP agent, its wallet and the domain were registered before the window as
-  configuration, not code.
+- **Before the window**: the colour tokens, type choices and the build brief were produced Aug 21-31
+  2026 and are unchanged since. The tokens are committed under `brand/` and
+  `apps/web/src/styles/tokens.css`; the brief itself is not published. The project also had a name
+  and a mark then, but neither is the one it carries now.
+- **Inside the window**: the name **Firsthand** and the four-rule mark were produced on Sep 6 2026
+  and landed in `ff366f6`, after another entrant shipped under the previous name. They are build-window
+  work and are not claimed as prior work. The colour and type they sit on are not.
+- **Accounts**: the ACP agent and its wallet were registered as configuration rather than code. The
+  agent was renamed to `Firsthand` inside the window, in the same rename.
+- **Domain**: none. The product is served from `firsthand-iota.vercel.app`. `usefirsthand.xyz` appears
+  in the source as the domain the host config expects and is not registered; `usecairn.xyz` belongs to
+  an unrelated project.
 - **Everything under `apps/`, `packages/`, `scripts/` and `tests/`** was written inside the window.
   The commit history is the record.
 - **Dependencies** are third-party and credited in `requirements.txt` and `package.json`.
