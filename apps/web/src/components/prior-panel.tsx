@@ -47,7 +47,7 @@ export function PriorPanel({
         </div>
       ) : (
         <>
-          <div className="mt-4 grid gap-6 md:grid-cols-[58%_42%]">
+          <div className="mt-4 grid gap-6 md:grid-cols-[58fr_42fr]">
             <div className="min-w-0">
               <p className="font-display text-[1.5rem] text-graphite">
                 {standingMoved

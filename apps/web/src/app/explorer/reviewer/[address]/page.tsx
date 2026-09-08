@@ -134,7 +134,7 @@ export default async function ReviewerPage({
 
   return (
     <Frame address={address}>
-      <div className="mt-10 grid gap-12 md:grid-cols-[58%_42%]">
+      <div className="mt-10 grid gap-12 md:grid-cols-[58fr_42fr]">
         <div className="min-w-0">
           <h2 className="max-w-[18ch] text-[length:var(--text-section)] leading-[var(--text-section-lead)] tracking-[var(--text-section-track)]">
             {weight && weight.corroborated === 0 && weight.claims > 0

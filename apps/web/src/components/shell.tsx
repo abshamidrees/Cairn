@@ -147,7 +147,15 @@ export function BasisColumn({
   return (
     <div className="min-w-0 border-l-0 border-seam md:border-l md:pl-8">
       <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">{label}</p>
-      <div className="mt-4 font-mono text-[0.8125rem] text-slate">{children}</div>
+      {/* This column exists to show hashes, addresses and source strings, and
+          every one of them is longer than the column is wide. Breaking is the
+          default here rather than something each row remembers to ask for: one
+          line that forgot pushed the whole grid track past the viewport and put
+          a horizontal scrollbar on the page. `anywhere` rather than break-all,
+          so ordinary words still break on spaces. */}
+      <div className="mt-4 font-mono text-[0.8125rem] text-slate [overflow-wrap:anywhere]">
+        {children}
+      </div>
     </div>
   );
 }
@@ -178,8 +186,12 @@ export function ClaimBasis({
       </div>
     );
   }
+  // fr, not percent. 58% + 42% + gap-8 sums to the container plus 32px, so the
+  // grid sat wider than the page at every width that used two columns and put a
+  // horizontal scrollbar under the whole site. fr divides what is left after the
+  // gap, which is what a 58/42 split was always supposed to mean.
   return (
-    <div className="grid gap-8 md:grid-cols-[58%_42%]">
+    <div className="grid gap-8 md:grid-cols-[58fr_42fr]">
       <div className="min-w-0">{claim}</div>
       <BasisColumn label={basisLabel}>{basis}</BasisColumn>
     </div>
