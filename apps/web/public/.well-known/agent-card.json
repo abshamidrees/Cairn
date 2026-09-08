@@ -1,0 +1,24 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Firsthand",
+  "description": "A memory-native trust layer for agent commerce. Firsthand indexes the ERC-8004 registries on Base, keeps an isolated dossier per counterparty, and returns a standing with the confidence and the specific observations the judgment rests on. Every verdict is arithmetic over events Firsthand witnessed itself, never a self-reported rating. Reads are free and need no key, no account and no wallet connection.",
+  "image": "https://firsthand-iota.vercel.app/favicon-512.png",
+  "services": [
+    {
+      "name": "web",
+      "endpoint": "https://firsthand-iota.vercel.app"
+    },
+    {
+      "name": "lookup",
+      "endpoint": "https://firsthand-8zqy.onrender.com/v1/lookup",
+      "version": "v1"
+    },
+    {
+      "name": "docs",
+      "endpoint": "https://firsthand-iota.vercel.app/docs"
+    }
+  ],
+  "x402Support": false,
+  "active": true,
+  "registrations": []
+}
