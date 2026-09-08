@@ -16,6 +16,9 @@ import { ErrorState, VerdictLine } from "@/components/primitives";
 
 const DUR_STACK_MS = 420;
 
+/** Above this many stones the stack draws thin, so volume stays on screen. */
+const DENSE_FROM = 24;
+
 /** However many stones there are, the stack finishes arriving inside this. */
 const MAX_ENTRY_MS = 1800;
 
@@ -38,6 +41,14 @@ export interface StackProps {
   readonly memory: "on" | "off";
   readonly leaving?: boolean;
   readonly animate?: boolean;
+  /** Ids that arrived after the stack had settled, for motion moment two. */
+  readonly arrived?: ReadonlySet<string>;
+  /**
+   * Overrides the counts line. The default counts observations, which is the
+   * right frame for most dossiers and the wrong one for a dossier that is a
+   * hundred claims from a single party.
+   */
+  readonly caption?: string;
   readonly onToggleMemory?: (next: "on" | "off") => void;
 }
 
@@ -50,6 +61,8 @@ export function Stack({
   memory,
   leaving = false,
   animate = true,
+  arrived,
+  caption,
   onToggleMemory,
 }: StackProps) {
   const flat = useMemo(() => flatten(stones), [stones]);
@@ -95,6 +108,7 @@ export function Stack({
   // Top down on screen, bottom up in the data.
   const bands = [...TIERS].reverse();
   const staggerCapMs = MAX_ENTRY_MS / Math.max(1, flat.length);
+  const dense = flat.length > DENSE_FROM;
 
   return (
     <div className="flex flex-col gap-6">
@@ -103,16 +117,24 @@ export function Stack({
         role="group"
         aria-label="Observations, stacked by memory tier"
         onKeyDown={onKeyDown}
-        className="flex max-w-[26rem] flex-col gap-2"
+        className={`flex max-w-[26rem] flex-col gap-2 ${dense ? "stack--dense" : ""}`}
       >
         {bands.map((tier) => {
           const inBand = stones[tier] ?? [];
           return (
-            <div key={tier} className="flex items-start gap-4">
-              <span className="w-[5.5rem] shrink-0 pt-1 font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
+            <div key={tier} className="flex items-start gap-0 sm:gap-4">
+              {/* Below sm the label costs 88px of a 390px screen, which is the
+                  difference between a dense stack and a row of stubs. The band
+                  order is fixed and documented, so the stones survive the cut
+                  and the labels do not. */}
+              <span className="hidden w-[5.5rem] shrink-0 pt-1 font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate sm:block">
                 {tier}
               </span>
-              <div className="flex min-h-[1.25rem] flex-1 flex-col items-start gap-1.5">
+              <div
+                className={`flex flex-1 flex-col items-start ${
+                  dense ? "min-h-[0.5rem] gap-0" : "min-h-[1.25rem] gap-1.5"
+                }`}
+              >
                 {inBand.map((stone) => {
                   const index = flat.indexOf(stone);
                   return (
@@ -124,6 +146,8 @@ export function Stack({
                       leaving={leaving}
                       enterOrder={index}
                       animate={animate && !leaving}
+                      arriving={arrived?.has(stone.id) ?? false}
+                      dense={dense}
                       staggerCapMs={staggerCapMs}
                       onFocus={() => {
                         setFocused(index);
@@ -141,7 +165,7 @@ export function Stack({
 
       <div className="flex flex-col gap-3 border-t border-seam pt-4">
         <p className="font-mono text-[0.8125rem] tabular-nums text-slate">
-          {counts.observations} observations · {counts.grounded} grounded
+          {caption ?? `${counts.observations} observations · ${counts.grounded} grounded`}
         </p>
         <VerdictLine standing={standing} confidence={confidence} noBasis={noBasis} />
         {onToggleMemory ? <MemoryToggle memory={memory} onChange={onToggleMemory} /> : null}
@@ -208,17 +232,33 @@ const EMPTY_STONES: Record<Tier, readonly StoneData[]> = {
  * the fall is visible rather than a jump cut. Under reduced motion the wait is
  * skipped entirely and the state simply changes.
  */
-export function DossierStack({ address }: { readonly address: string }) {
+export function DossierStack({
+  address,
+  caption,
+}: {
+  readonly address: string;
+  readonly caption?: string;
+}) {
   const [dossier, setDossier] = useState<Dossier | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [memory, setMemory] = useState<"on" | "off">("on");
   const [leaving, setLeaving] = useState(false);
+  // Ids present on the previous response. Anything not in here on the next one
+  // arrived while the reader was looking at it, which is motion moment two.
+  const seen = useRef<ReadonlySet<string> | null>(null);
+  const [arrived, setArrived] = useState<ReadonlySet<string>>(new Set());
 
   const load = useCallback(
     async (next: "on" | "off", signal?: AbortSignal) => {
       try {
         setError(null);
         const data = await fetchDossier(address, { memory: next, ...(signal ? { signal } : {}) });
+        const ids = new Set(flatten(data.stones).map((stone) => stone.id));
+        const before = seen.current;
+        // The first response is the build, not an arrival: everything would be
+        // new, and marking it so would replace moment one with moment two.
+        setArrived(before === null ? new Set() : new Set([...ids].filter((id) => !before.has(id))));
+        seen.current = ids;
         setDossier(data);
       } catch (cause) {
         if ((cause as Error).name === "AbortError") return;
@@ -276,6 +316,8 @@ export function DossierStack({ address }: { readonly address: string }) {
       memory={memory}
       leaving={leaving}
       animate={memory === "on"}
+      arrived={arrived}
+      {...(caption === undefined ? {} : { caption })}
       onToggleMemory={(next) => void toggle(next)}
     />
   );

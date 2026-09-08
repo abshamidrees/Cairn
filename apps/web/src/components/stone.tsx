@@ -28,6 +28,15 @@ export interface StoneProps {
   /** Bottom-up entry order across the whole stack, for the stagger. */
   readonly enterOrder: number;
   readonly animate: boolean;
+  /** True for a stone that arrived after the stack had already settled. */
+  readonly arriving?: boolean;
+  /**
+   * Drawn at a few pixels, in a band of a hundred. The tilt is what makes a
+   * stack read as hand stacked at full size, and at 3px it reads as torn
+   * paper: the ends swing further than the stone is tall. Density and lean
+   * are the same signal about an uneven record, so a dense band keeps one.
+   */
+  readonly dense?: boolean;
   /**
    * Upper bound on the per-stone delay, in milliseconds. The spec's 90ms is
    * right for a dossier of a few dozen stones and absurd for a few hundred:
@@ -46,22 +55,33 @@ export function Stone({
   leaving,
   enterOrder,
   animate,
+  arriving = false,
+  dense = false,
   staggerCapMs,
   onFocus,
   onSelect,
 }: StoneProps) {
+  const tilt = dense ? 0 : stone.tilt;
   const style: CSSProperties & Record<"--tilt", string> = {
-    "--tilt": `${stone.tilt}deg`,
+    "--tilt": `${tilt}deg`,
     width: `${stoneWidth(stone.weight)}%`,
-    transform: `rotate(${stone.tilt}deg)`,
-    animationDelay: animate
+    transform: `rotate(${tilt}deg)`,
+    animationDelay: arriving
+      ? undefined
+      : animate
       ? staggerCapMs === undefined
         ? `calc(${enterOrder} * var(--stagger))`
         : `calc(${enterOrder} * min(var(--stagger), ${staggerCapMs}ms))`
       : undefined,
   };
 
-  const state = leaving ? "stone--leaving" : animate ? "stone--entering" : "";
+  const state = leaving
+    ? "stone--leaving"
+    : arriving
+      ? "stone--arriving"
+      : animate
+        ? "stone--entering"
+        : "";
 
   return (
     <button

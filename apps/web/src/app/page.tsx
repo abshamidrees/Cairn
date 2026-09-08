@@ -19,8 +19,17 @@ import { getStats, type Stats } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 
-/** A counterparty in the indexed set with three independent claimants. */
-const HERO_DOSSIER = "0x01f90369170c917a2c0e9d26d54c6a3a400984d3";
+/**
+ * The busiest dossier in the indexed set: a hundred observations, every one of
+ * them from the same claimant, none corroborated by anybody else.
+ *
+ * The hero used to show the grounded counterparty, which holds three
+ * observations. Three stones across five bands leaves four of them empty, and a
+ * reader who has never seen the product reads empty bands as a failed load
+ * rather than as a sparse record. This dossier is also the strongest argument
+ * the project has: volume is not evidence, and here is a hundred of it.
+ */
+const HERO_DOSSIER = "0x69747c4ce6185d21a33b3bcdba980d659600ac7b";
 
 const TIER_MEANING: Readonly<Record<string, string>> = {
   HOT: "the live verdict, rewritten in place",
@@ -38,15 +47,30 @@ const STANDING_MEANING: readonly (readonly ["grounded" | "thin" | "suspect" | "d
     ["dormant", "Nothing witnessed inside the decay window."],
   ];
 
+/**
+ * Five consecutive sections at one spacing reads as a template regardless of
+ * what is in them, so the page carries three and alternates. The loosest is
+ * 2.4x the tightest.
+ */
+type Space = "tight" | "base" | "loose";
+
+const SPACE: Record<Space, string> = {
+  tight: "py-[var(--space-tight)]",
+  base: "py-[var(--space-base)]",
+  loose: "py-[var(--space-loose)]",
+};
+
 function Section({
   eyebrow,
+  space = "base",
   children,
 }: {
   readonly eyebrow: string;
+  readonly space?: Space;
   readonly children: React.ReactNode;
 }) {
   return (
-    <section className="border-t border-seam py-20">
+    <section className={`border-t border-seam ${SPACE[space]}`}>
       <p className="eyebrow mb-10">{eyebrow}</p>
       {children}
     </section>
@@ -72,14 +96,16 @@ const STATS: readonly (readonly [string, string])[] = [
 
 function StatStrip() {
   return (
-    <section className="py-20">
+    <section className="py-[var(--space-base)]">
       <div className="border-t border-seam">
         {STATS.map(([figure, label]) => (
           <div
             key={figure}
             className="flex flex-col gap-2 border-b border-seam py-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8"
           >
-            <span className="font-mono text-[clamp(2rem,4vw,3rem)] tabular-nums leading-none text-graphite">
+            {/* On a phone these carry the argument, so they start large and
+                grow with the viewport rather than shrinking into the label. */}
+            <span className="font-mono text-[clamp(2.75rem,9vw,3rem)] tabular-nums leading-none text-graphite">
               {figure}
             </span>
             <span className="max-w-[34rem] text-slate sm:text-right">{label}</span>
@@ -100,7 +126,7 @@ function WhatFirsthandHolds({ stats }: { readonly stats: Stats }) {
   if (examples.length === 0) return null;
 
   return (
-    <Section eyebrow="THE RECORD">
+    <Section eyebrow="THE RECORD" space="tight">
       <ClaimBasis
         claim={
           <>
@@ -136,7 +162,7 @@ function WhatFirsthandHolds({ stats }: { readonly stats: Stats }) {
 function FiveTiers({ stats }: { readonly stats: Stats }) {
   const order = ["HOT", "WARM", "COLD", "REFERENCE", "ARCHIVE"] as const;
   return (
-    <Section eyebrow="HOW IT REMEMBERS">
+    <Section eyebrow="HOW IT REMEMBERS" space="loose">
       <ClaimBasis
         claim={
           <>
@@ -149,6 +175,7 @@ function FiveTiers({ stats }: { readonly stats: Stats }) {
             </p>
           </>
         }
+        stacked
         basisLabel="rows Firsthand holds right now"
         basis={
           <table className="w-full border-collapse">
@@ -242,8 +269,17 @@ function ReviewerWeighting({ stats }: { readonly stats: Stats }) {
 
 function Standing({ stats }: { readonly stats: Stats }) {
   return (
-    <Section eyebrow="STANDING">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <Section eyebrow="STANDING" space="tight">
+      {/* The one section with no basis column. Four standings, and the counts
+          under them are the basis, so a second column would repeat itself. */}
+      <h2 className="mx-auto max-w-[24ch] text-center text-[length:var(--text-section)] leading-[var(--text-section-lead)] tracking-[var(--text-section-track)]">
+        Four standings, and one of them is deliberately colourless.
+      </h2>
+      <p className="mx-auto mt-6 max-w-[46rem] text-center text-[length:var(--text-lead)] leading-[var(--text-lead-lead)] text-slate">
+        Absence of evidence is rendered as absence. Firsthand does not reach for a warning colour
+        when what it actually holds is nothing.
+      </p>
+      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STANDING_MEANING.map(([standing, definition]) => (
           <div key={standing} className="rounded-stone border border-seam bg-paper p-6">
             <StandingChip standing={standing} />
@@ -263,7 +299,16 @@ function Standing({ stats }: { readonly stats: Stats }) {
 
 /* ---- 06 The one dark panel ----------------------------------------------- */
 
-const DELETION_OUTPUT = `  memory ON      standing=grounded  confidence=0.83  basis=3  observations
+/**
+ * A recorded run, not a live figure. Confidence decays with recency, so any
+ * number pasted here starts drifting the day it is written: this block read
+ * 0.83 until the record aged past it. It is labelled with the date it was taken
+ * so a reader comparing it against the live explorer sees a dated run rather
+ * than a contradiction.
+ */
+const DELETION_RUN_DATE = "2026-09-08";
+
+const DELETION_OUTPUT = `  memory ON      standing=grounded  confidence=0.82  basis=3  observations
   memory OFF     standing=thin      confidence=-     basis=0  observations
                  ↳ verdict engine returned NO_BASIS
 
@@ -286,6 +331,10 @@ function DeletionPanel() {
               {DELETION_OUTPUT}
             </code>
           </pre>
+          <p className="mt-4 font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-scree">
+            recorded run, {DELETION_RUN_DATE}. Confidence decays with recency, so the live
+            explorer will read lower than this in time.
+          </p>
         </div>
         <a
           href="https://github.com/abshamidrees/cairn"
@@ -309,7 +358,7 @@ export default async function LandingPage() {
 
       <main>
         {/* Hero */}
-        <section className="mx-auto max-w-[78rem] px-6 py-20 lg:py-28">
+        <section className="ruled mx-auto max-w-[78rem] px-6 py-20 lg:py-28">
           <div className="grid gap-16 lg:grid-cols-[1fr_26rem] lg:gap-20">
             <div>
               <h1 className="text-[length:var(--text-hero)] leading-[var(--text-hero-lead)] tracking-[var(--text-hero-track)]">
@@ -342,7 +391,10 @@ export default async function LandingPage() {
                 here: the characteristic thing about Firsthand is that it can show
                 you its own basis, so that is what the hero shows. */}
             <div>
-              <DossierStack address={HERO_DOSSIER} />
+              <DossierStack
+                address={HERO_DOSSIER}
+                caption="100 claims · 0 corroborated by anybody else"
+              />
             </div>
           </div>
         </section>
@@ -375,7 +427,7 @@ export default async function LandingPage() {
         <DeletionPanel />
 
         {/* 07 CTA */}
-        <section className="mx-auto max-w-[78rem] px-6 py-24 text-center">
+        <section className="ruled mx-auto max-w-[78rem] px-6 py-[var(--space-loose)] text-center">
           <h2 className="text-[length:var(--text-section)] leading-[var(--text-section-lead)] tracking-[var(--text-section-track)]">
             Look up an agent you were about to pay.
           </h2>

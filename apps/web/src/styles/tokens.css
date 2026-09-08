@@ -70,6 +70,15 @@
   --text-label:       0.6875rem;   /* 11px mono uppercase */
   --text-label-track: 0.13em;
 
+  /* The ledger rhythm. One texture in the whole product, and this is it. */
+  --rule-step:    2.25rem;
+
+  /* Section rhythm. Identical spacing on every section reads as a template,
+     so the page has three and alternates deliberately. */
+  --space-tight:  4.5rem;
+  --space-base:   7rem;
+  --space-loose:  11rem;   /* 2.4x the tightest */
+
   /* Layout */
   --measure:      42rem;   /* prose max-width */
   --gutter:       clamp(1.25rem, 4vw, 3rem);
@@ -134,6 +143,40 @@
 }
 
 @layer components {
+  /* ---- The ruled field ------------------------------------
+     Hairline rules at a fixed rhythm, like the page of a ledger. The whole
+     product is a record of what was witnessed, so the one texture it gets is
+     the one a record is kept on.
+
+     repeating-linear-gradient here draws hard-edged 1px rules, not a wash:
+     there is no visible colour transition anywhere in it, which is what the
+     no-gradient rule is about. The mask is a real fade, and it exists so the
+     rules stop before they reach body copy rather than being drawn faintly
+     underneath it. Used in exactly two places, the hero and the closing band. */
+  .ruled {
+    position: relative;
+    isolation: isolate;
+  }
+  .ruled::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-seam) 0,
+      var(--color-seam) 1px,
+      transparent 1px,
+      transparent var(--rule-step)
+    );
+    /* Strongest in the empty lower half and gone before it reaches the
+       headline. Ruled paper sits under the margin of a page, not under the
+       words. */
+    -webkit-mask-image: linear-gradient(to top, #000 0, transparent 55%);
+    mask-image: linear-gradient(to top, #000 0, transparent 55%);
+    opacity: 0.85;
+  }
   /* ---- Standing chips ------------------------------------
      Four standings, one visual grammar. THIN is deliberately
      colourless: no evidence, no colour. */
@@ -162,6 +205,12 @@
     transition: transform var(--dur-base) var(--ease-settle),
                 opacity  var(--dur-base) var(--ease-settle);
   }
+  /* A hundred observations cannot be drawn at the height of three: at 14px
+     with gaps it runs past two thousand pixels. Density is the honest way to
+     render volume, and a hundred uncorroborated claims read as a mass rather
+     than a list, which is the whole point of showing this dossier. */
+  .stack--dense .stone { height: 3px; }
+
   .stone--grounded { background: var(--color-lapis); }
   .stone--thin     { background: transparent; border: 1px solid var(--color-seam); }
   .stone--suspect  { background: var(--color-oxide); }
@@ -173,6 +222,19 @@
   }
   .stone--entering {
     animation: stone-settle var(--dur-stack) var(--ease-settle) backwards;
+  }
+
+  /* Motion moment two: evidence arriving into a stack that has already
+     settled. It carries no stagger, because it is one stone and not a build,
+     and it holds a beat longer so a single arrival is legible where a stone in
+     the initial build would not need to be. */
+  @keyframes stone-arrive {
+    from { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+    60%  { opacity: 1; }
+    to   { transform: translateY(0)     rotate(var(--tilt, 0deg)); opacity: 1; }
+  }
+  .stone--arriving {
+    animation: stone-arrive var(--dur-base) var(--ease-settle) backwards;
   }
 
   /* The deletion toggle, motion moment three. Stones fall away downward and

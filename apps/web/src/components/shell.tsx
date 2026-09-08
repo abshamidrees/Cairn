@@ -156,11 +156,28 @@ export function ClaimBasis({
   claim,
   basisLabel,
   basis,
+  stacked = false,
 }: {
   readonly claim: ReactNode;
   readonly basisLabel: string;
   readonly basis: ReactNode;
+  /**
+   * Puts the basis full width beneath the claim instead of beside it. The
+   * split is the thesis and does not change; where it sits on the page is
+   * execution, and running the same two columns five times reads as a
+   * template. Wide bases, a table of every tier for instance, are also
+   * simply better full width.
+   */
+  readonly stacked?: boolean;
 }) {
+  if (stacked) {
+    return (
+      <div className="flex flex-col gap-10">
+        <div className="min-w-0 max-w-[52rem]">{claim}</div>
+        <BasisColumn label={basisLabel}>{basis}</BasisColumn>
+      </div>
+    );
+  }
   return (
     <div className="grid gap-8 md:grid-cols-[58%_42%]">
       <div className="min-w-0">{claim}</div>

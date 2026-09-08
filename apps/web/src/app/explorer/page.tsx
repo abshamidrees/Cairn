@@ -1,6 +1,7 @@
 import { Nav } from "@/components/shell";
 import { ExplorerSearch } from "@/components/explorer-search";
 import { apiBase } from "@/lib/api";
+import { getStats } from "@/lib/stats";
 
 /** The explorer's entry point. An instrument, not a marketing page. */
 
@@ -17,8 +18,17 @@ async function getRecent(): Promise<readonly string[]> {
   }
 }
 
+const STANDING_ORDER = ["grounded", "thin", "suspect", "dormant"] as const;
+
+const STANDING_GLOSS: Readonly<Record<(typeof STANDING_ORDER)[number], string>> = {
+  grounded: "corroborated by a party that did not make the claim",
+  thin: "too little witnessed to say anything",
+  suspect: "the record contradicts itself, and the rows can be named",
+  dormant: "nothing witnessed inside the decay window",
+};
+
 export default async function ExplorerPage() {
-  const recent = await getRecent();
+  const [recent, stats] = await Promise.all([getRecent(), getStats()]);
 
   return (
     <>
@@ -50,7 +60,44 @@ export default async function ExplorerPage() {
           </p>
         </div>
 
-        <section className="mt-14">
+        {/* The page ran two thirds empty below the search. This is what the
+            front of a reference work carries: what is in the set, and what a
+            lookup returns. Counts are live, so a set that changes says so. */}
+        {stats === null ? null : (
+          <section className="mt-16 max-w-[46rem]">
+            <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
+              the indexed set, {stats.counterparties} counterparties
+            </p>
+            <dl className="mt-4 border-t border-seam">
+              {STANDING_ORDER.map((standing) => (
+                <div
+                  key={standing}
+                  className="flex items-baseline justify-between gap-6 border-b border-seam py-3"
+                >
+                  <dt className="font-mono text-[0.8125rem] uppercase tracking-[0.13em] text-graphite">
+                    {standing}
+                  </dt>
+                  <dd className="flex items-baseline gap-6">
+                    <span className="hidden text-right text-slate sm:inline">
+                      {STANDING_GLOSS[standing]}
+                    </span>
+                    <span className="w-12 shrink-0 text-right font-mono text-[1.125rem] tabular-nums text-graphite">
+                      {stats.standings[standing] ?? 0}
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-5 max-w-[42rem] text-slate">
+              A counterparty address returns its dossier: the observations Firsthand witnessed,
+              arranged by the tier each one lives in, and a verdict with the basis it rests on.
+              Prefix an address with rv: to read a claimant instead, and see how much of what they
+              said anybody else corroborated.
+            </p>
+          </section>
+        )}
+
+        <section className="mt-16">
           <p className="font-mono text-[0.6875rem] uppercase tracking-[0.13em] text-slate">
             recent, from Firsthand&rsquo;s own record
           </p>
