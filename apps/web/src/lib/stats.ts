@@ -7,7 +7,7 @@
  * should not exist. Showing a zero would be a claim; showing nothing is not.
  */
 
-import { apiBase } from "@/lib/api";
+import { apiBase, type Dossier } from "@/lib/api";
 
 export interface ObservationExample {
   readonly kind: string;
@@ -56,6 +56,31 @@ export async function getStats(): Promise<Stats | null> {
   } catch {
     // The record lives on the machine that serves it. If that machine is not
     // answering, the page says less rather than saying something untrue.
+    return null;
+  }
+}
+
+/**
+ * One dossier, fetched on the server so the hero arrives whole.
+ *
+ * Fetching it in the browser meant the Stack mounted at 102px and grew to 800
+ * once the response landed, which moved everything below the hero down the page
+ * and was most of the layout shift the page was scoring. It also put a round
+ * trip on the critical path for the one element the page is built around.
+ *
+ * The toggle still refetches client side, because a genuine `?memory=off` round
+ * trip is the point of it. This only removes the first one.
+ */
+export async function getDossier(address: string): Promise<Dossier | null> {
+  try {
+    const response = await fetch(`${apiBase()}/v1/dossier/${address}?memory=on`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as Dossier;
+  } catch {
+    // Same rule as the stats: the record lives on the machine that serves it.
+    // If that machine is quiet the client will try again and say so properly.
     return null;
   }
 }

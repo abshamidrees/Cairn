@@ -253,11 +253,17 @@ const EMPTY_STONES: Record<Tier, readonly StoneData[]> = {
 export function DossierStack({
   address,
   caption,
+  initial,
 }: {
   readonly address: string;
   readonly caption?: string;
+  /**
+   * Fetched on the server, so the first paint is the whole stack rather than a
+   * skeleton that grows into one. The toggle still goes to the network.
+   */
+  readonly initial?: Dossier | null;
 }) {
-  const [dossier, setDossier] = useState<Dossier | null>(null);
+  const [dossier, setDossier] = useState<Dossier | null>(initial ?? null);
   const [error, setError] = useState<string | null>(null);
   const [memory, setMemory] = useState<"on" | "off">("on");
   const [leaving, setLeaving] = useState(false);
@@ -287,10 +293,16 @@ export function DossierStack({
   );
 
   useEffect(() => {
+    // The server already resolved this one. Refetching it on mount would
+    // reintroduce the round trip the server render exists to remove.
+    if (initial != null) {
+      seen.current = new Set(flatten(initial.stones).map((stone) => stone.id));
+      return;
+    }
     const controller = new AbortController();
     void load("on", controller.signal);
     return () => controller.abort();
-  }, [load]);
+  }, [load, initial]);
 
   const toggle = useCallback(
     async (next: "on" | "off") => {

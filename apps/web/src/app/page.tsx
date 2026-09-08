@@ -2,7 +2,7 @@ import { StandingChip } from "@/components/primitives";
 import { DossierStack } from "@/components/stack";
 import { Integrate } from "@/components/integrate";
 import { ClaimBasis, Footer, Nav } from "@/components/shell";
-import { getStats, type Stats } from "@/lib/stats";
+import { getDossier, getStats, type Stats } from "@/lib/stats";
 
 /**
  * The landing page.
@@ -350,7 +350,7 @@ function DeletionPanel() {
 /* ---- the page ------------------------------------------------------------ */
 
 export default async function LandingPage() {
-  const stats = await getStats();
+  const [stats, heroDossier] = await Promise.all([getStats(), getDossier(HERO_DOSSIER)]);
 
   return (
     <>
@@ -394,6 +394,7 @@ export default async function LandingPage() {
               <DossierStack
                 address={HERO_DOSSIER}
                 caption="100 claims · 0 corroborated by anybody else"
+                initial={heroDossier}
               />
             </div>
           </div>
