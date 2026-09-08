@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TIERS, fetchDossier, type Dossier, type Stone as StoneData, type Tier } from "@/lib/api";
 import { ObservationCard, Stone } from "@/components/stone";
 import { ErrorState, VerdictLine } from "@/components/primitives";
+import { VerdictCard } from "@/components/verdict-card";
 
 /**
  * The Stack renders one counterparty's dossier as a literal firsthand.
@@ -49,6 +50,12 @@ export interface StackProps {
    * hundred claims from a single party.
    */
   readonly caption?: string;
+  /**
+   * Shows the live verdict in the slot that otherwise waits for a stone to be
+   * selected. Passed only where the counterparty is known, which is every real
+   * use; the kitchen sink renders the Stack on fixtures and keeps the prompt.
+   */
+  readonly counterparty?: string;
   readonly onToggleMemory?: (next: "on" | "off") => void;
 }
 
@@ -63,6 +70,7 @@ export function Stack({
   animate = true,
   arrived,
   caption,
+  counterparty,
   onToggleMemory,
 }: StackProps) {
   const flat = useMemo(() => flatten(stones), [stones]);
@@ -171,7 +179,17 @@ export function Stack({
         {onToggleMemory ? <MemoryToggle memory={memory} onChange={onToggleMemory} /> : null}
       </div>
 
-      <ObservationCard stone={selected} />
+      {selected === null && counterparty !== undefined ? (
+        <VerdictCard
+          counterparty={counterparty}
+          standing={standing}
+          confidence={confidence}
+          basis={stones.COLD ?? []}
+          total={counts.observations}
+        />
+      ) : (
+        <ObservationCard stone={selected} />
+      )}
     </div>
   );
 }
@@ -317,6 +335,7 @@ export function DossierStack({
       leaving={leaving}
       animate={memory === "on"}
       arrived={arrived}
+      counterparty={dossier.counterparty}
       {...(caption === undefined ? {} : { caption })}
       onToggleMemory={(next) => void toggle(next)}
     />

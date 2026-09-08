@@ -62,9 +62,22 @@ app = FastAPI(
 # silently in the browser: the Stack simply never loads, and the page still
 # scores well while showing nothing. That has happened once already, so the
 # deployed origin is configuration rather than something to remember to edit.
+#: The deployed web app, hardcoded on purpose.
+#:
+#: This was configuration only, and configuration is a thing you can forget: the
+#: environment group carrying it sat unlinked to any service for two days while
+#: every dossier on the deployed site showed a connection error. The failure is
+#: silent in the browser and invisible to a page score, which is the worst
+#: combination to leave resting on a dashboard checkbox before a deadline.
+#: FIRSTHAND_WEB_ORIGIN still works and still wins for anything else; this is
+#: the floor under it. The endpoint is a public read-only view of public chain
+#: data, so a permissive origin costs nothing.
+DEPLOYED_WEB_ORIGIN = "https://firsthand-iota.vercel.app"
+
 _ORIGIN_PATTERNS = [
     r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     r"https://([a-z0-9-]+\.)?usefirsthand\.xyz",
+    re.escape(DEPLOYED_WEB_ORIGIN),
     *(
         re.escape(origin.strip())
         for origin in os.environ.get("FIRSTHAND_WEB_ORIGIN", "").split(",")
