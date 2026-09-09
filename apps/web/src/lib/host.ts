@@ -13,7 +13,21 @@
 
 export type Surface = "landing" | "explorer" | "docs";
 
-const CONFIGURED_ROOT = process.env["NEXT_PUBLIC_ROOT_DOMAIN"] ?? "";
+/**
+ * Read an environment variable, treating blank as absent.
+ *
+ * `??` only catches null and undefined, so a variable set to the empty string
+ * came through as "". That is not a hypothetical: a project configured with a
+ * blank NEXT_PUBLIC_SITE_ORIGIN reached `new URL("")` in the layout's
+ * metadataBase and failed the whole build with ERR_INVALID_URL, after
+ * compiling cleanly. A misconfigured value should degrade to the default, not
+ * take the site down.
+ */
+function configured(name: string): string {
+  return (process.env[name] ?? "").trim();
+}
+
+const CONFIGURED_ROOT = configured("NEXT_PUBLIC_ROOT_DOMAIN");
 
 /** The domain the subdomain surfaces live on once DNS points at the deployment. */
 export const ROOT_DOMAIN = CONFIGURED_ROOT || "usefirsthand.xyz";
@@ -32,7 +46,7 @@ const PATH_ROOT: Record<Surface, string> = {
 };
 
 function siteOrigin(): string {
-  return process.env["NEXT_PUBLIC_SITE_ORIGIN"] ?? "http://localhost:3000";
+  return configured("NEXT_PUBLIC_SITE_ORIGIN") || "http://localhost:3000";
 }
 
 /** True only when a root domain is configured, which is what splits the surfaces. */
