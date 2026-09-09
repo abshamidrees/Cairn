@@ -29,6 +29,7 @@ from typing import Any
 
 from web3 import Web3
 from web3.contract import Contract
+from web3.logs import DISCARD
 from web3.types import TxReceipt
 
 from apps.agent.memory.store import MemoryCapReachedError, Store
@@ -191,7 +192,13 @@ class Registrar:
         assumed. A receipt without the event means the write did not do what
         this script says it does, and that is worth failing on.
         """
-        events = contract.events.Registered().process_receipt(receipt)
+        # DISCARD, not the default WARN. Asking for one event still walks every
+        # log in the receipt, so the three the registry also emits (the ERC-721
+        # Transfer for the mint, MetadataUpdate and MetadataSet) each produced a
+        # MismatchedABI warning. Three stack traces in the middle of a
+        # transaction that spends money read as something going wrong, and
+        # nothing was: they are simply not the event being asked for.
+        events = contract.events.Registered().process_receipt(receipt, errors=DISCARD)
         if not events:
             raise RegistrationError(
                 "the receipt carried no Registered event, so no agent id was assigned"
