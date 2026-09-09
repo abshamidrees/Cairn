@@ -31,10 +31,11 @@ same fields the dry run printed before it was sent, and the ACP listing is Virtu
 | ACP offering | `Counterparty dossier`, `01a060b1-cb39-77b7-8024-f511e2c31b1e`, 0.01 USDC, 10 minute SLA, visible |
 | Identity registry read | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) |
 | Reputation registry read | [`0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`](https://basescan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) |
-| Indexed set | Base 8453, blocks 50,763,849 to 50,783,850 (20,002 blocks), 107 agents |
+| Indexed set | Base 8453, blocks 50,763,849 to 50,783,850 (20,002 blocks), 107 agents, plus the 11 blocks carrying Firsthand's own registration at 51,043,076 |
 | Attestation contract | [`0xaB4eB81cd12957Aa56744D02a3a842BEC5AAEE4B`](https://basescan.org/address/0xaB4eB81cd12957Aa56744D02a3a842BEC5AAEE4B) on Base 8453, deployed in [`0x5cd89c14`](https://basescan.org/tx/0x5cd89c1472461705480062892b5d0617d36e606f22b95159e06671b4decb8947) |
 | Published attestation | [`0x65407e03`](https://basescan.org/tx/0x65407e03b1ad643b2e208762757e4294e5aab66be1d82dacdeb01d300affd9b6): `grounded` on `0x01f90369...`, confidence 8300 bps, 3 observations, basis hash `a72393df...` |
 | Web app | <https://firsthand-iota.vercel.app> |
+| ERC-8004 registration | Agent [`85531`](https://basescan.org/tx/0x6bfbbef1ecf29188d77341449dee49eb1809054740b056345c5c96e03c1cb378) on the Identity Registry, registered in block 51,043,076, pointing at [`/.well-known/agent-card.json`](https://firsthand-iota.vercel.app/.well-known/agent-card.json) |
 | Public lookup API | Runs locally on port 8000. Free, no auth, no wallet connection to read |
 
 The lookup endpoint takes no key and returns the basis with the verdict:
@@ -80,12 +81,15 @@ python scripts/deletion_test.py --agent 0x01f90369170c917a2c0e9d26d54c6a3a400984
 Real output against the indexed set:
 
 ```
-  memory ON      standing=grounded  confidence=0.83  basis=3  observations
+  memory ON      standing=grounded  confidence=0.82  basis=3  observations
   memory OFF     standing=thin      confidence=-     basis=0  observations
                  ↳ verdict engine returned NO_BASIS
 
   Firsthand's core function is unavailable without the memory layer.  PASS
 ```
+
+Confidence decays with recency, so that is a recorded run from 2026-09-09 rather than a live figure.
+It read 0.83 a day earlier. The explorer reads the current number.
 
 It exits non-zero if the memory-off run ever produces a usable verdict. The swap is one line at the
 call site, because `evaluate()` takes a `Store` and cannot tell the two apart.
@@ -101,12 +105,12 @@ Volunteering the limits is what makes the rest credible.
 | Five-tier promotion, demotion and archival | **Real.** [`store.py`](apps/agent/memory/store.py), 21 tests, exercised over the live indexed set. Mutation-checked: removing the promotion journal, the tenant switch or the archival record each fails the test that guards it |
 | Tenant isolation | **Real.** Two dossiers cannot see each other's rows, asserted directly |
 | Deterministic verdict, no model in the decision path | **Real.** [`verdict.py`](apps/agent/judge/verdict.py), 27 tests. No LLM is called anywhere in this repo; [`tests/test_boundary.py`](tests/test_boundary.py) parses the judge package to keep it that way |
-| Base registry reads | **Real.** 20,002 blocks, 364 observations, 107 agents. The feedback event ABI is unpublished and was derived from the wire, decoding 549 of 549 live logs |
+| Base registry reads | **Real.** 20,013 blocks, 365 observations, 107 agents. The feedback event ABI is unpublished and was derived from the wire, decoding 549 of 549 live logs |
 | Reviewer weighting | **Real over the indexed set.** 13 of 14 claimants are below the corroboration threshold, so their weights are provisional and the API returns them flagged |
 | ACP agent and offering | **Real and live**, and [publicly listed](https://app.virtuals.io/acp/agent/01a06098-ef45-7e55-8ad6-21970291edb3) without a login. **No job has been run.** A job is created and funded by a buyer, not by the provider, so this needs a second agent rather than a balance: the wallet already holds 1.90 USDC against a 0.01 price. The listing says the same thing, and it is not our page |
 | ACP Evaluator role | **Code complete and tested, never exercised.** [`observe/acp.py`](apps/agent/observe/acp.py), 13 tests against a fake CLI runner |
 | Base attestation write | **Landed.** Contract [`0xaB4eB81c`](https://basescan.org/address/0xaB4eB81cd12957Aa56744D02a3a842BEC5AAEE4B), attestation [`0x65407e03`](https://basescan.org/tx/0x65407e03b1ad643b2e208762757e4294e5aab66be1d82dacdeb01d300affd9b6). The published fields match what `--dry-run` printed beforehand, and the event can be decoded from the chain to check it |
-| Indexed coverage | **Scoped, not truncated.** 20,002 blocks, not the full ERC-8004 set, because the free tier caps the database at 5,242,880 bytes. Stated here rather than hidden |
+| Indexed coverage | **Scoped, not truncated.** 20,002 blocks of survey, not the full ERC-8004 set, because the free tier caps the database at 5,242,880 bytes. Stated here rather than hidden |
 | `suspect` standing | **Unreachable on current data, by design.** No agent in the indexed set has two conflicting owner records. Part 21 forbids accusing without a contradiction we can name, so the honest count is zero |
 | CI | **Green.** ruff, mypy strict, the suite, then the deletion test against a fixture built at run time from synthetic addresses. The badge above links to the run |
 | Hosted API, demo video | **Neither yet.** The web app is deployed but reads an API that is still local, so the deployed landing page renders only what it can source |
@@ -141,13 +145,13 @@ exists to say there are none, because omitting it would imply one.
 
 ## What the indexed set actually shows
 
-Firsthand read 20,002 blocks of the ERC-8004 registries on Base and judged every counterparty it found.
+Firsthand read 20,002 blocks of the ERC-8004 registries on Base and judged every counterparty it found. It later registered itself on the same registry and indexed that too, which is the 71st dossier and the only one it holds about itself.
 
 | | |
 |---|---|
 | Counterparty dossiers | 70 |
 | Claimant dossiers | 14 |
-| Observations | 364 (139 feedback, 139 claims, 86 registrations) |
+| Observations | 365 (139 feedback, 139 claims, 87 registrations) |
 | Registration files | 55 resolved, 24 unavailable |
 | Rows by tier | COLD 564, WARM 7, HOT 11, REFERENCE 2, ARCHIVE 0 |
 | Standings | grounded 1, thin 69, suspect 0, dormant 0 |

@@ -13,8 +13,10 @@ a registration file through the standard views rather than a bespoke ABI.
 
 ## The indexed set
 
-20,002 blocks, 50,763,849 to 50,783,850. 107 agents, 70 counterparty dossiers, 14 claimant dossiers,
-364 observations, 55 registration files resolved and 24 unavailable.
+20,002 blocks, 50,763,849 to 50,783,850, plus the 11 around 51,043,076 that carry Firsthand's own
+registration. 107 agents, 71 counterparty dossiers, 14 claimant dossiers, 365 observations. Of the 87
+registrations, 45 resolve to a document that can be fetched and 42 do not: the registry accepts any
+string, and plenty of them point at `data:` payloads, dead hosts or nothing at all.
 
 Scoped rather than truncated: the free tier caps the database at 5,242,880 bytes, and the scope is
 stated instead of quietly cut.

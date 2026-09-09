@@ -1,22 +1,31 @@
 {
-  "generated_at": "2026-09-03T01:16:04Z",
+  "generated_at": "2026-09-09T05:05:55Z",
   "method": {
     "chain_id": 8453,
     "identity_registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
     "reputation_registry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
     "blocks": "50763849-50783850",
+    "self_registration": {
+      "what": "Firsthand registered itself on the same identity registry it surveys, and indexed that registration into the same set.",
+      "blocks": "51043070-51043080",
+      "agent_id": 85531,
+      "tx": "0x6bfbbef1ecf29188d77341449dee49eb1809054740b056345c5c96e03c1cb378",
+      "carries_feedback": false
+    },
     "reproduce": [
       "python -m apps.agent.observe.base --from-block 50763849 --to-block 50783850",
+      "python -m apps.agent.observe.base --from-block 51043070 --to-block 51043080",
       "python scripts/scan.py --db data/memory.db"
     ],
     "note": "Aggregate only. No agent or claimant is named, ranked or accused. This is a finding about the registry's design."
   },
   "indexed": {
-    "blocks_scanned": 20002,
+    "blocks_scanned": 20013,
     "agents_seen": 107,
-    "counterparty_dossiers": 70,
+    "counterparty_dossiers": 71,
+    "of_which_firsthand_itself": 1,
     "claimant_dossiers": 14,
-    "observations": 225
+    "observations": 226
   },
   "finding": {
     "subjects_with_feedback": 22,
@@ -32,7 +41,7 @@
   },
   "standings": {
     "grounded": 1,
-    "thin": 69,
+    "thin": 70,
     "suspect": 0,
     "dormant": 0,
     "grounded_requires": "3 or more observations corroborated by a different party",

@@ -45,6 +45,15 @@ REPUTATION = "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63"
 FROM_BLOCK = 50_763_849
 TO_BLOCK = 50_783_850
 
+#: Firsthand's own registration, indexed separately and 260,000 blocks past the
+#: survey. The method names both ranges rather than widening the first, because
+#: someone running the survey command alone should get the survey, and the count
+#: they get should be the count published for it. One row of the total is ours.
+SELF_FROM_BLOCK = 51_043_070
+SELF_TO_BLOCK = 51_043_080
+SELF_AGENT_ID = 85531
+SELF_TX = "0x6bfbbef1ecf29188d77341449dee49eb1809054740b056345c5c96e03c1cb378"
+
 
 def _address_of(tenant: str) -> str:
     return tenant.split(":")[-1]
@@ -92,9 +101,21 @@ def build(store: MemoryStore) -> dict[str, Any]:
             "identity_registry": IDENTITY,
             "reputation_registry": REPUTATION,
             "blocks": f"{FROM_BLOCK}-{TO_BLOCK}",
+            "self_registration": {
+                "what": (
+                    "Firsthand registered itself on the same identity registry "
+                    "it surveys, and indexed that registration into the same set."
+                ),
+                "blocks": f"{SELF_FROM_BLOCK}-{SELF_TO_BLOCK}",
+                "agent_id": SELF_AGENT_ID,
+                "tx": SELF_TX,
+                "carries_feedback": False,
+            },
             "reproduce": [
                 f"python -m apps.agent.observe.base --from-block {FROM_BLOCK}"
                 f" --to-block {TO_BLOCK}",
+                f"python -m apps.agent.observe.base --from-block {SELF_FROM_BLOCK}"
+                f" --to-block {SELF_TO_BLOCK}",
                 "python scripts/scan.py --db data/memory.db",
             ],
             "note": (
@@ -103,9 +124,11 @@ def build(store: MemoryStore) -> dict[str, Any]:
             ),
         },
         "indexed": {
-            "blocks_scanned": TO_BLOCK - FROM_BLOCK + 1,
+            "blocks_scanned": (TO_BLOCK - FROM_BLOCK + 1)
+            + (SELF_TO_BLOCK - SELF_FROM_BLOCK + 1),
             "agents_seen": 107,
             "counterparty_dossiers": len(counterparties),
+            "of_which_firsthand_itself": 1,
             "claimant_dossiers": len(reviewers),
             "observations": observations,
         },
