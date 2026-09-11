@@ -5,7 +5,7 @@ another, it answers the only question that matters, *has this counterparty done 
 would before?*, and shows the observations the answer came from. Every verdict is arithmetic over
 a record Firsthand witnessed itself, never a rating somebody self-reported.
 
-[![ci](https://github.com/abshamidrees/Cairn/actions/workflows/ci.yml/badge.svg)](https://github.com/abshamidrees/Cairn/actions/workflows/ci.yml)
+[![ci](https://github.com/abshamidrees/Firsthand/actions/workflows/ci.yml/badge.svg)](https://github.com/abshamidrees/Firsthand/actions/workflows/ci.yml)
 
 [Run it locally](#run-it-locally) · [Methodology](#the-methodology-is-generated-from-the-engine) · [Where memory is load-bearing](#where-memory-is-load-bearing) · [What is real and what is not](#what-is-real-and-what-is-not)
 
